@@ -296,3 +296,8 @@ docker-compose down -v         # stop + wipe Postgres & ChromaDB volumes
 | Frontend shows offline (red dot) | Backend still starting; refresh after ~60s |
 | Empty answers | Run `docker-compose exec rag python scripts/ingest_all.py` |
 | Rebuild from scratch | `docker-compose down -v && docker-compose up --build` |
+
+
+## Snap of Project
+![alt text](images/img_01.png)
+![alt text](images/img_02.png)
