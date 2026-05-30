@@ -1,0 +1,33 @@
+ACME Corp — Data Governance & Compliance Policy
+Version 1.5 | Effective: Q1 2024 | Classification: Internal
+
+GDPR COMPLIANCE
+ACME Corp processes personal data of EU residents under GDPR (Regulation 2016/679).
+Legal basis for processing: Contract performance, Legitimate interests, Consent.
+Data Protection Officer (DPO): legal-dpo@acmecorp.com
+Annual DPIA (Data Protection Impact Assessment) completed: January 2024.
+
+SOX COMPLIANCE
+As a publicly traded entity, ACME Corp complies with Sarbanes-Oxley Act Section 404.
+Internal controls reviewed quarterly by Finance and Internal Audit.
+External audit performed annually by Grant & Partners LLP.
+Audit findings Q1 2024: No material weaknesses identified.
+
+DATA RETENTION SCHEDULE
+Customer PII: 7 years post-contract end
+Financial records: 10 years (IRS requirement)
+HR records: 7 years post-employment
+System logs: 12 months (security), 36 months (audit)
+Legal holds: Indefinite until hold released
+
+INCIDENT RESPONSE
+P0 (Critical breach): 1-hour response, 72-hour GDPR notification obligation.
+P1 (High): 4-hour response, internal stakeholder notification within 24 hours.
+P2 (Medium): 24-hour response.
+Security contact: security@acmecorp.com | +1-555-0199 (24/7 hotline)
+
+ACCESS CONTROL POLICY
+Principle of least privilege enforced across all systems.
+Privileged access reviews conducted quarterly.
+MFA mandatory for all employees with system access.
+Third-party vendor access reviewed annually.

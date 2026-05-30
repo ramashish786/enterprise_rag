@@ -1,0 +1,33 @@
+ACME Corp — Q1 2024 Financial Report
+Prepared by: Finance Department | Confidential
+
+EXECUTIVE SUMMARY
+Total Revenue: $48.7M (+12% YoY)
+Operating Expenses: $31.2M
+EBITDA: $17.5M (36% margin)
+Net Profit: $11.8M
+
+REVENUE BREAKDOWN
+- Product Sales: $29.1M (59.7%)
+- Professional Services: $12.4M (25.5%)
+- Licensing & Subscriptions: $7.2M (14.8%)
+
+EXPENSE CATEGORIES
+- R&D: $9.8M (31% of OpEx)
+- Sales & Marketing: $8.4M (27%)
+- General & Administrative: $6.5M (21%)
+- Infrastructure & Cloud: $6.5M (21%)
+
+BUDGET VARIANCE
+Q1 revenue exceeded forecast by $2.3M (5% positive variance).
+Cloud infrastructure costs were $0.8M over budget due to increased compute usage.
+Hiring in engineering department is 2 months behind plan (cost savings: $1.1M).
+
+FORECAST Q2 2024
+Projected Revenue: $51.2M
+Key risks: enterprise deal slippage, FX headwinds in EMEA.
+
+CASH POSITION
+Cash & Equivalents: $84.3M
+Accounts Receivable: $18.7M (DSO: 47 days)
+Accounts Payable: $9.2M

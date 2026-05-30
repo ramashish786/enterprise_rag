@@ -1,0 +1,96 @@
+{
+  "policy_version": "2024.Q1",
+  "last_updated": "2024-03-15",
+  "data_classification": {
+    "finance_reports": {
+      "classification": "Confidential",
+      "encryption_required": true,
+      "retention_years": 7,
+      "allowed_roles": [
+        "admin",
+        "finance"
+      ],
+      "owner": "CFO Office"
+    },
+    "hr_records": {
+      "classification": "Highly Confidential - PII",
+      "encryption_required": true,
+      "retention_years": 7,
+      "allowed_roles": [
+        "admin",
+        "hr",
+        "legal"
+      ],
+      "owner": "Head of People"
+    },
+    "engineering_docs": {
+      "classification": "Internal",
+      "encryption_required": false,
+      "retention_years": 5,
+      "allowed_roles": [
+        "admin",
+        "engineering"
+      ],
+      "owner": "VP Engineering"
+    },
+    "legal_contracts": {
+      "classification": "Highly Confidential",
+      "encryption_required": true,
+      "retention_years": 10,
+      "allowed_roles": [
+        "admin",
+        "legal"
+      ],
+      "owner": "General Counsel"
+    },
+    "sales_data": {
+      "classification": "Confidential",
+      "encryption_required": true,
+      "retention_years": 5,
+      "allowed_roles": [
+        "admin",
+        "sales"
+      ],
+      "owner": "CRO Office"
+    },
+    "compliance": {
+      "classification": "Internal",
+      "encryption_required": false,
+      "retention_years": 10,
+      "allowed_roles": [
+        "admin",
+        "finance",
+        "hr",
+        "legal"
+      ],
+      "owner": "Compliance Team"
+    },
+    "operational": {
+      "classification": "Internal",
+      "encryption_required": false,
+      "retention_years": 3,
+      "allowed_roles": [
+        "admin",
+        "finance",
+        "engineering",
+        "sales"
+      ],
+      "owner": "COO Office"
+    },
+    "public": {
+      "classification": "Public",
+      "encryption_required": false,
+      "retention_years": 2,
+      "allowed_roles": [
+        "admin",
+        "finance",
+        "hr",
+        "engineering",
+        "legal",
+        "sales",
+        "viewer"
+      ],
+      "owner": "Marketing"
+    }
+  }
+}

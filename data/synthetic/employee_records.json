@@ -1,0 +1,167 @@
+[
+  {
+    "employee_id": "EMP1001",
+    "name": "James Li",
+    "department": "Sales",
+    "level": "L2",
+    "annual_salary_usd": 84000,
+    "start_date": "2020-12-09",
+    "status": "Active",
+    "performance_rating": 3.1,
+    "annual_leave_days_remaining": 4
+  },
+  {
+    "employee_id": "EMP1002",
+    "name": "Maria Garcia",
+    "department": "Finance",
+    "level": "L3",
+    "annual_salary_usd": 164000,
+    "start_date": "2020-11-24",
+    "status": "Active",
+    "performance_rating": 4.7,
+    "annual_leave_days_remaining": 2
+  },
+  {
+    "employee_id": "EMP1003",
+    "name": "David Okonkwo",
+    "department": "HR",
+    "level": "L4",
+    "annual_salary_usd": 145000,
+    "start_date": "2023-01-01",
+    "status": "On Leave",
+    "performance_rating": 2.7,
+    "annual_leave_days_remaining": 7
+  },
+  {
+    "employee_id": "EMP1004",
+    "name": "Priya Patel",
+    "department": "Legal",
+    "level": "L5",
+    "annual_salary_usd": 134000,
+    "start_date": "2020-09-07",
+    "status": "Probation",
+    "performance_rating": 4.3,
+    "annual_leave_days_remaining": 22
+  },
+  {
+    "employee_id": "EMP1005",
+    "name": "Tom Andersen",
+    "department": "Marketing",
+    "level": "L1",
+    "annual_salary_usd": 139000,
+    "start_date": "2023-04-15",
+    "status": "Active",
+    "performance_rating": 4.0,
+    "annual_leave_days_remaining": 25
+  },
+  {
+    "employee_id": "EMP1006",
+    "name": "Fatima Al-Hassan",
+    "department": "Operations",
+    "level": "L2",
+    "annual_salary_usd": 70000,
+    "start_date": "2021-12-14",
+    "status": "Active",
+    "performance_rating": 3.4,
+    "annual_leave_days_remaining": 4
+  },
+  {
+    "employee_id": "EMP1007",
+    "name": "Chris Wong",
+    "department": "Engineering",
+    "level": "L3",
+    "annual_salary_usd": 97000,
+    "start_date": "2022-02-03",
+    "status": "Active",
+    "performance_rating": 3.4,
+    "annual_leave_days_remaining": 11
+  },
+  {
+    "employee_id": "EMP1008",
+    "name": "Anna Kowalski",
+    "department": "Sales",
+    "level": "L4",
+    "annual_salary_usd": 178000,
+    "start_date": "2022-10-09",
+    "status": "On Leave",
+    "performance_rating": 4.5,
+    "annual_leave_days_remaining": 23
+  },
+  {
+    "employee_id": "EMP1009",
+    "name": "Raj Kumar",
+    "department": "Finance",
+    "level": "L5",
+    "annual_salary_usd": 128000,
+    "start_date": "2020-07-03",
+    "status": "Probation",
+    "performance_rating": 3.9,
+    "annual_leave_days_remaining": 20
+  },
+  {
+    "employee_id": "EMP1010",
+    "name": "Sarah O'Brien",
+    "department": "HR",
+    "level": "L1",
+    "annual_salary_usd": 149000,
+    "start_date": "2022-10-07",
+    "status": "Active",
+    "performance_rating": 4.3,
+    "annual_leave_days_remaining": 1
+  },
+  {
+    "employee_id": "EMP1011",
+    "name": "Michael Cho",
+    "department": "Legal",
+    "level": "L2",
+    "annual_salary_usd": 154000,
+    "start_date": "2021-05-03",
+    "status": "Active",
+    "performance_rating": 4.6,
+    "annual_leave_days_remaining": 3
+  },
+  {
+    "employee_id": "EMP1012",
+    "name": "Elena Rossi",
+    "department": "Marketing",
+    "level": "L3",
+    "annual_salary_usd": 118000,
+    "start_date": "2022-08-21",
+    "status": "Active",
+    "performance_rating": 4.6,
+    "annual_leave_days_remaining": 5
+  },
+  {
+    "employee_id": "EMP1013",
+    "name": "Samuel Adeyemi",
+    "department": "Operations",
+    "level": "L4",
+    "annual_salary_usd": 117000,
+    "start_date": "2022-04-22",
+    "status": "On Leave",
+    "performance_rating": 3.2,
+    "annual_leave_days_remaining": 21
+  },
+  {
+    "employee_id": "EMP1014",
+    "name": "Yuki Tanaka",
+    "department": "Engineering",
+    "level": "L5",
+    "annual_salary_usd": 152000,
+    "start_date": "2020-10-21",
+    "status": "Probation",
+    "performance_rating": 2.9,
+    "annual_leave_days_remaining": 23
+  },
+  {
+    "employee_id": "EMP1015",
+    "name": "Laura Dubois",
+    "department": "Sales",
+    "level": "L1",
+    "annual_salary_usd": 101000,
+    "start_date": "2021-08-13",
+    "status": "Active",
+    "performance_rating": 3.2,
+    "annual_leave_days_remaining": 20
+  }
+]

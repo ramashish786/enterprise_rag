@@ -1,0 +1,48 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: rag-postgres
+    environment:
+      POSTGRES_USER: rag
+      POSTGRES_PASSWORD: rag
+      POSTGRES_DB: enterprise
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rag -d enterprise"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  rag:
+    build: .
+    image: enterprise-rag:latest
+    container_name: enterprise-rag
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - LLM_MODEL=${LLM_MODEL:-gpt-4o-mini}
+      - CHROMA_PERSIST_DIR=/app/chroma_db
+      - POSTGRES_URL=postgresql+psycopg2://rag:rag@postgres:5432/enterprise
+    volumes:
+      - chroma_data:/app/chroma_db
+      - ./data/synthetic:/app/data/synthetic
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 90s
+
+volumes:
+  pg_data:
+  chroma_data:

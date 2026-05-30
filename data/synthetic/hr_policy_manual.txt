@@ -1,0 +1,36 @@
+ACME Corp Human Resources Policy Manual
+Version 3.2 | Effective: January 2024 | Confidential
+
+LEAVE POLICY
+Annual Leave: All full-time employees receive 25 days per calendar year.
+Sick Leave: 10 days per year, no carry-forward.
+Parental Leave: 16 weeks primary caregiver, 6 weeks secondary caregiver.
+Carry-forward: Maximum 10 days may be carried into the following year.
+
+PERFORMANCE REVIEW CYCLE
+Reviews occur bi-annually: June and December.
+Rating scale: 1.0 (Needs Improvement) to 5.0 (Exceptional).
+Employees rated below 2.5 enter a 90-day Performance Improvement Plan (PIP).
+Promotions require rating of 4.0+ for two consecutive cycles.
+
+COMPENSATION BANDS (2024)
+L1: $65,000 – $85,000
+L2: $85,000 – $110,000
+L3: $110,000 – $145,000
+L4: $145,000 – $190,000
+L5: $190,000 – $250,000
+
+ONBOARDING PROCESS
+Week 1: IT setup, security training, HR orientation.
+Week 2-4: Role-specific onboarding with assigned buddy.
+Day 90: First check-in with manager and HR business partner.
+
+DISCIPLINARY PROCEDURE
+Step 1: Verbal warning (documented).
+Step 2: Written warning.
+Step 3: Final written warning with PIP.
+Step 4: Termination with cause.
+
+REMOTE WORK POLICY
+Employees may work remotely up to 3 days per week with manager approval.
+Fully remote roles require VP sign-off and quarterly in-office visits.

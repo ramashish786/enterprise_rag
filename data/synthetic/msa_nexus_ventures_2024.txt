@@ -1,0 +1,42 @@
+MASTER SERVICE AGREEMENT — ACME Corp & Nexus Ventures Ltd
+Contract ID: MSA-2024-0042 | Effective: 1 January 2024 | Confidential
+
+PARTIES
+This Master Service Agreement ("Agreement") is entered into between ACME Corp
+("Service Provider") and Nexus Ventures Ltd ("Client").
+
+SCOPE OF SERVICES
+Service Provider agrees to deliver software platform services as described in
+the applicable Statement of Work (SOW). Initial SOW covers:
+- Access to ACME SaaS platform (Professional tier)
+- Up to 500 user seats
+- Standard API access (1000 req/min)
+- 99.9% uptime SLA with 1-hour RTO
+
+PAYMENT TERMS
+Annual contract value: $240,000 USD
+Payment schedule: Quarterly in advance ($60,000 per quarter)
+Late payment interest: 1.5% per month on outstanding balance
+Currency: USD; international wire transfers accepted.
+
+LIABILITY AND INDEMNIFICATION
+Service Provider liability is capped at 12 months of fees paid.
+Client indemnifies Service Provider against claims arising from Client data.
+Neither party liable for indirect, consequential, or punitive damages.
+
+DATA PROTECTION
+Service Provider is GDPR compliant (EU Standard Contractual Clauses attached).
+Data Processing Agreement (DPA) incorporated by reference (Exhibit B).
+Client data retained for 90 days post-termination then permanently deleted.
+
+TERMINATION
+Either party may terminate with 90 days written notice.
+Service Provider may terminate immediately for material breach not cured within 30 days.
+Client data export available for 30 days post-termination.
+
+GOVERNING LAW
+This Agreement is governed by the laws of the State of Delaware, USA.
+Disputes resolved by binding arbitration under AAA Commercial Rules.
+
+CONFIDENTIALITY
+Both parties agree to keep terms confidential for 3 years post-termination.

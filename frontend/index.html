@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Enterprise RAG Intelligence System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0b0d;
+    --bg2: #111318;
+    --bg3: #181c23;
+    --bg4: #1f242e;
+    --border: rgba(255,255,255,0.07);
+    --border-bright: rgba(255,255,255,0.14);
+    --text: #e8eaf0;
+    --text2: #8b90a0;
+    --text3: #555c6e;
+    --accent: #4f9cf9;
+    --accent2: #3d7fd4;
+    --accent-glow: rgba(79,156,249,0.15);
+    --green: #3ecf8e;
+    --green-bg: rgba(62,207,142,0.1);
+    --amber: #f5a623;
+    --amber-bg: rgba(245,166,35,0.1);
+    --red: #f26b6b;
+    --red-bg: rgba(242,107,107,0.1);
+    --purple: #a78bfa;
+    --purple-bg: rgba(167,139,250,0.1);
+    --radius: 10px;
+    --radius-lg: 16px;
+    --mono: 'DM Mono', monospace;
+    --serif: 'Instrument Serif', serif;
+    --sans: 'DM Sans', sans-serif;
+  }
+
+  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 15px; line-height: 1.6; }
+
+  /* layout */
+  .shell { display: grid; grid-template-columns: 280px 1fr; height: 100vh; overflow: hidden; }
+  .sidebar { background: var(--bg2); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow-y: auto; }
+  .main { display: flex; flex-direction: column; overflow: hidden; }
+
+  /* sidebar */
+  .logo { padding: 24px 20px 16px; border-bottom: 1px solid var(--border); }
+  .logo-mark { font-family: var(--serif); font-size: 18px; color: var(--text); letter-spacing: -0.3px; }
+  .logo-mark span { color: var(--accent); font-style: italic; }
+  .logo-sub { font-size: 11px; color: var(--text3); letter-spacing: 0.06em; text-transform: uppercase; margin-top: 2px; font-family: var(--mono); }
+
+  .sidebar-section { padding: 16px 20px 8px; }
+  .sidebar-label { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); font-weight: 500; margin-bottom: 10px; }
+
+  /* Login card */
+  .login-card { margin: 12px 16px; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+  .login-card input { width: 100%; background: var(--bg4); border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; color: var(--text); font-family: var(--sans); font-size: 13px; margin-bottom: 8px; outline: none; transition: border-color 0.15s; }
+  .login-card input:focus { border-color: var(--accent); }
+  .login-card input::placeholder { color: var(--text3); }
+  .btn { width: 100%; padding: 8px; background: var(--accent); color: #fff; border: none; border-radius: 6px; font-family: var(--sans); font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.15s, transform 0.1s; }
+  .btn:hover { background: var(--accent2); }
+  .btn:active { transform: scale(0.98); }
+  .btn.secondary { background: var(--bg4); color: var(--text2); border: 1px solid var(--border); margin-top: 6px; }
+  .btn.secondary:hover { background: var(--bg3); color: var(--text); }
+  .btn.danger { background: var(--red-bg); color: var(--red); border: 1px solid rgba(242,107,107,0.2); margin-top: 6px; }
+
+  /* User pill */
+  .user-pill { margin: 12px 16px; background: var(--green-bg); border: 1px solid rgba(62,207,142,0.2); border-radius: var(--radius); padding: 12px 14px; display: none; }
+  .user-pill.active { display: block; }
+  .user-name { font-weight: 500; font-size: 14px; color: var(--green); }
+  .user-role { font-size: 11px; color: var(--text2); font-family: var(--mono); margin-top: 2px; }
+  .user-sources { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 4px; }
+  .source-chip { font-size: 10px; font-family: var(--mono); padding: 2px 7px; border-radius: 4px; background: var(--bg4); border: 1px solid var(--border); color: var(--text2); }
+
+  /* Nav */
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 7px; cursor: pointer; font-size: 13px; color: var(--text2); margin: 2px 8px; transition: all 0.12s; border: none; background: none; width: calc(100% - 16px); text-align: left; }
+  .nav-item:hover { background: var(--bg3); color: var(--text); }
+  .nav-item.active { background: var(--accent-glow); color: var(--accent); }
+  .nav-icon { font-size: 15px; width: 18px; text-align: center; flex-shrink: 0; }
+
+  /* Demo users */
+  .demo-user { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; margin: 2px 0; transition: background 0.12s; border: 1px solid transparent; }
+  .demo-user:hover { background: var(--bg4); border-color: var(--border); }
+  .demo-avatar { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 500; flex-shrink: 0; }
+  .demo-info { flex: 1; min-width: 0; }
+  .demo-username { color: var(--text); font-weight: 500; }
+  .demo-role-badge { font-size: 10px; font-family: var(--mono); color: var(--text3); }
+
+  /* main area */
+  .topbar { height: 52px; border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 24px; gap: 16px; flex-shrink: 0; }
+  .topbar-title { font-size: 14px; font-weight: 500; color: var(--text); }
+  .topbar-sep { color: var(--text3); }
+  .topbar-sub { font-size: 13px; color: var(--text2); }
+  .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); margin-left: auto; box-shadow: 0 0 6px var(--green); flex-shrink: 0; }
+  .status-dot.offline { background: var(--red); box-shadow: 0 0 6px var(--red); }
+
+  /* panels */
+  .panel { display: none; flex: 1; overflow-y: auto; flex-direction: column; }
+  .panel.active { display: flex; }
+
+  /* chat */
+  .chat-messages { flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 20px; }
+  .chat-messages::-webkit-scrollbar { width: 4px; }
+  .chat-messages::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 2px; }
+
+  .msg { display: flex; gap: 12px; max-width: 900px; }
+  .msg.user { flex-direction: row-reverse; margin-left: auto; }
+  .msg-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
+  .msg.user .msg-avatar { background: var(--accent); color: #fff; font-weight: 500; }
+  .msg.system .msg-avatar { background: var(--bg4); border: 1px solid var(--border); font-size: 14px; }
+
+  .msg-body { max-width: 680px; }
+  .msg.user .msg-body { align-items: flex-end; display: flex; flex-direction: column; }
+
+  .msg-bubble { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-lg); border-top-left-radius: 4px; padding: 14px 16px; font-size: 14px; line-height: 1.7; }
+  .msg.user .msg-bubble { background: var(--accent); border-color: var(--accent2); color: #fff; border-top-left-radius: var(--radius-lg); border-top-right-radius: 4px; }
+
+  .msg-answer { font-size: 14px; line-height: 1.75; }
+  .msg-meta { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; }
+  .badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-family: var(--mono); padding: 3px 8px; border-radius: 5px; border: 1px solid; }
+  .badge.confidence-high { background: var(--green-bg); border-color: rgba(62,207,142,0.25); color: var(--green); }
+  .badge.confidence-medium { background: var(--amber-bg); border-color: rgba(245,166,35,0.25); color: var(--amber); }
+  .badge.confidence-low { background: var(--red-bg); border-color: rgba(242,107,107,0.25); color: var(--red); }
+  .badge.source { background: var(--purple-bg); border-color: rgba(167,139,250,0.25); color: var(--purple); }
+  .badge.info { background: var(--bg4); border-color: var(--border); color: var(--text2); }
+
+  .chunks-toggle { font-size: 11px; color: var(--text3); cursor: pointer; margin-top: 8px; display: flex; align-items: center; gap: 4px; font-family: var(--mono); background: none; border: none; padding: 0; transition: color 0.12s; }
+  .chunks-toggle:hover { color: var(--accent); }
+  .chunks-panel { margin-top: 10px; display: none; flex-direction: column; gap: 8px; }
+  .chunks-panel.open { display: flex; }
+  .chunk-card { background: var(--bg4); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; font-size: 12px; }
+  .chunk-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+  .chunk-source { font-family: var(--mono); color: var(--accent); font-size: 11px; }
+  .chunk-score { font-family: var(--mono); font-size: 11px; color: var(--green); }
+  .chunk-snippet { color: var(--text2); line-height: 1.5; }
+  .chunk-ref { font-family: var(--mono); font-size: 10px; color: var(--text3); margin-top: 4px; }
+
+  .reasoning-block { margin-top: 10px; background: var(--bg4); border-left: 2px solid var(--accent); border-radius: 0 6px 6px 0; padding: 8px 12px; font-size: 12px; color: var(--text2); font-style: italic; }
+
+  .thinking { display: flex; align-items: center; gap: 8px; color: var(--text3); font-size: 13px; padding: 14px 16px; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-lg); }
+  .dot-pulse { display: flex; gap: 4px; }
+  .dot-pulse span { width: 5px; height: 5px; background: var(--text3); border-radius: 50%; animation: pulse 1.2s ease-in-out infinite; }
+  .dot-pulse span:nth-child(2) { animation-delay: 0.2s; }
+  .dot-pulse span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes pulse { 0%,80%,100%{opacity:0.3;transform:scale(0.8)} 40%{opacity:1;transform:scale(1)} }
+
+  .error-msg { background: var(--red-bg); border: 1px solid rgba(242,107,107,0.25); border-radius: var(--radius); padding: 10px 14px; font-size: 13px; color: var(--red); }
+
+  /* Chat input */
+  .chat-input-area { padding: 16px 24px; border-top: 1px solid var(--border); background: var(--bg); flex-shrink: 0; }
+  .chat-input-row { display: flex; gap: 10px; align-items: flex-end; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 10px 14px; transition: border-color 0.15s; }
+  .chat-input-row:focus-within { border-color: var(--border-bright); }
+  .chat-input-row textarea { flex: 1; background: none; border: none; color: var(--text); font-family: var(--sans); font-size: 14px; resize: none; outline: none; min-height: 24px; max-height: 140px; line-height: 1.5; padding-top: 2px; }
+  .chat-input-row textarea::placeholder { color: var(--text3); }
+  .send-btn { width: 34px; height: 34px; background: var(--accent); border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #fff; transition: background 0.15s, transform 0.1s; flex-shrink: 0; }
+  .send-btn:hover { background: var(--accent2); }
+  .send-btn:active { transform: scale(0.95); }
+  .send-btn:disabled { background: var(--bg4); color: var(--text3); cursor: not-allowed; }
+  .input-hint { font-size: 11px; color: var(--text3); margin-top: 6px; text-align: center; font-family: var(--mono); }
+
+  /* ingest panel */
+  .panel-body { padding: 28px 32px; max-width: 680px; }
+  .panel-heading { font-family: var(--serif); font-size: 26px; color: var(--text); margin-bottom: 6px; }
+  .panel-sub { color: var(--text2); font-size: 14px; margin-bottom: 28px; }
+
+  .form-group { margin-bottom: 18px; }
+  .form-label { font-size: 12px; font-weight: 500; color: var(--text2); letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 6px; display: block; font-family: var(--mono); }
+  .form-select { width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; color: var(--text); font-family: var(--sans); font-size: 14px; outline: none; transition: border-color 0.15s; appearance: none; cursor: pointer; }
+  .form-select:focus { border-color: var(--accent); }
+  .form-select option { background: var(--bg3); }
+
+  .dropzone { border: 2px dashed var(--border-bright); border-radius: var(--radius-lg); padding: 40px 24px; text-align: center; cursor: pointer; transition: all 0.15s; background: var(--bg3); }
+  .dropzone:hover, .dropzone.drag { border-color: var(--accent); background: var(--accent-glow); }
+  .dropzone-icon { font-size: 32px; color: var(--text3); margin-bottom: 10px; }
+  .dropzone-text { font-size: 14px; color: var(--text2); }
+  .dropzone-hint { font-size: 12px; color: var(--text3); margin-top: 4px; font-family: var(--mono); }
+  .dropzone input { display: none; }
+  .file-selected { margin-top: 10px; background: var(--bg4); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; font-size: 13px; }
+  .file-name { flex: 1; font-family: var(--mono); font-size: 12px; color: var(--accent); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .file-size { font-size: 11px; color: var(--text3); font-family: var(--mono); }
+
+  .ingest-result { margin-top: 16px; padding: 14px 16px; border-radius: var(--radius); font-size: 13px; font-family: var(--mono); }
+  .ingest-result.success { background: var(--green-bg); border: 1px solid rgba(62,207,142,0.25); color: var(--green); }
+  .ingest-result.error { background: var(--red-bg); border: 1px solid rgba(242,107,107,0.25); color: var(--red); }
+
+  /* stats panel */
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 28px; }
+  .stat-card { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; }
+  .stat-label { font-size: 11px; font-family: var(--mono); color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+  .stat-value { font-size: 28px; font-family: var(--serif); color: var(--text); }
+  .stat-sub { font-size: 12px; color: var(--text2); margin-top: 4px; }
+
+  .sources-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .sources-table th { text-align: left; padding: 8px 12px; font-size: 11px; font-family: var(--mono); color: var(--text3); border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 500; }
+  .sources-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .sources-table tr:last-child td { border-bottom: none; }
+
+  /* scrollbar global */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 3px; }
+
+  /* empty state */
+  .empty-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 40px; text-align: center; }
+  .empty-icon { font-size: 40px; color: var(--text3); }
+  .empty-title { font-family: var(--serif); font-size: 22px; color: var(--text2); }
+  .empty-sub { font-size: 13px; color: var(--text3); max-width: 380px; line-height: 1.7; }
+  .example-queries { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 8px; }
+  .example-q { font-size: 12px; padding: 6px 12px; border: 1px solid var(--border); border-radius: 20px; cursor: pointer; color: var(--text2); transition: all 0.12s; background: var(--bg3); }
+  .example-q:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
+
+  /* Toast */
+  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--bg3); border: 1px solid var(--border-bright); border-radius: 10px; padding: 12px 18px; font-size: 13px; color: var(--text); box-shadow: 0 8px 32px rgba(0,0,0,0.4); z-index: 999; transform: translateY(80px); opacity: 0; transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1); pointer-events: none; }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.success { border-color: rgba(62,207,142,0.3); }
+  .toast.error { border-color: rgba(242,107,107,0.3); }
+
+  /* Auth required overlay */
+  .auth-required { position: absolute; inset: 0; background: rgba(10,11,13,0.85); display: flex; align-items: center; justify-content: center; z-index: 10; backdrop-filter: blur(4px); }
+  .auth-required-box { background: var(--bg3); border: 1px solid var(--border-bright); border-radius: var(--radius-lg); padding: 32px 36px; text-align: center; max-width: 320px; }
+  .auth-required-icon { font-size: 36px; color: var(--text3); margin-bottom: 14px; }
+  .auth-required-title { font-family: var(--serif); font-size: 20px; margin-bottom: 8px; }
+  .auth-required-sub { font-size: 13px; color: var(--text2); line-height: 1.6; }
+
+  @media (max-width: 700px) {
+    .shell { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .panel-body { padding: 20px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-mark">Enterprise <span>RAG</span></div>
+      <div class="logo-sub">Intelligence System</div>
+    </div>
+
+    <!-- Login / User -->
+    <div id="login-section">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Sign In</div>
+      </div>
+      <div class="login-card">
+        <input id="inp-user" type="text" placeholder="Username" autocomplete="username" />
+        <input id="inp-pass" type="password" placeholder="Password" autocomplete="current-password" />
+        <button class="btn" onclick="doLogin()">Connect</button>
+      </div>
+      <div class="sidebar-section" style="padding-top:8px;">
+        <div class="sidebar-label">Demo Accounts</div>
+        <div id="demo-users-list"></div>
+      </div>
+    </div>
+
+    <div id="user-section" style="display:none;">
+      <div class="user-pill active" id="user-pill">
+        <div class="user-name" id="pill-name"></div>
+        <div class="user-role" id="pill-role"></div>
+        <div class="user-sources" id="pill-sources"></div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-label">Navigation</div>
+      </div>
+      <button class="nav-item active" data-panel="chat" onclick="switchPanel('chat', this)">
+        <span class="nav-icon">💬</span> Query Assistant
+      </button>
+      <button class="nav-item" data-panel="ingest" onclick="switchPanel('ingest', this)">
+        <span class="nav-icon">📤</span> Ingest Document
+      </button>
+      <button class="nav-item" data-panel="stats" onclick="switchPanel('stats', this)">
+        <span class="nav-icon">📊</span> System Stats
+      </button>
+
+      <div style="margin-top:auto; padding:16px;">
+        <button class="btn secondary" style="margin-top:0;" onclick="doLogout()">Sign out</button>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main" style="position:relative;">
+
+    <!-- Top bar -->
+    <div class="topbar">
+      <span class="topbar-title" id="topbar-title">Enterprise RAG</span>
+      <span class="topbar-sep">·</span>
+      <span class="topbar-sub" id="topbar-sub">Secure multi-source retrieval</span>
+      <div class="status-dot" id="status-dot" title="Server status"></div>
+    </div>
+
+    <!-- chat -->
+    <div class="panel active" id="panel-chat">
+      <div class="chat-messages" id="chat-messages">
+        <div class="empty-state" id="empty-state">
+          <div class="empty-icon">🔍</div>
+          <div class="empty-title">Ask anything across your data</div>
+          <div class="empty-sub">Your queries are answered using only sources you're authorized to access. All responses include citations and confidence scores.</div>
+          <div class="example-queries" id="example-queries"></div>
+        </div>
+      </div>
+      <div class="chat-input-area">
+        <div class="chat-input-row">
+          <textarea id="chat-textarea" placeholder="Ask a question across your enterprise data…" rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+          <button class="send-btn" id="send-btn" onclick="sendQuery()" title="Send">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+          </button>
+        </div>
+        <div class="input-hint" id="input-hint">Sign in to start querying · Enter ↵ to send · Shift+Enter for new line</div>
+      </div>
+
+      <!-- Auth required overlay for chat -->
+      <div class="auth-required" id="chat-auth-required">
+        <div class="auth-required-box">
+          <div class="auth-required-icon">🔐</div>
+          <div class="auth-required-title">Authentication Required</div>
+          <div class="auth-required-sub" style="margin-top:8px;">Sign in with your credentials using the sidebar to query enterprise data.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ingest -->
+    <div class="panel" id="panel-ingest">
+      <div class="panel-body">
+        <div class="panel-heading">Ingest Document</div>
+        <div class="panel-sub">Upload a file to index into the enterprise knowledge base. Admin access required.</div>
+
+        <div class="form-group">
+          <label class="form-label">Data Source Type</label>
+          <select class="form-select" id="source-type">
+            <option value="finance_reports">Finance Reports</option>
+            <option value="hr_records">HR Records</option>
+            <option value="engineering_docs">Engineering Docs</option>
+            <option value="legal_contracts">Legal Contracts</option>
+            <option value="sales_data">Sales Data</option>
+            <option value="compliance">Compliance</option>
+            <option value="operational">Operational</option>
+            <option value="public">Public</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">File</label>
+          <div class="dropzone" id="dropzone" onclick="document.getElementById('file-input').click()" ondragover="dropzone_dragover(event)" ondrop="dropzone_drop(event)" ondragleave="dropzone_dragleave(event)">
+            <input type="file" id="file-input" accept=".pdf,.csv,.json,.jsonl,.txt,.md" onchange="fileSelected(event)" />
+            <div class="dropzone-icon">📁</div>
+            <div class="dropzone-text">Drop file here or click to browse</div>
+            <div class="dropzone-hint">PDF · CSV · JSON · JSONL · TXT · MD</div>
+          </div>
+          <div class="file-selected" id="file-selected" style="display:none;">
+            <span style="font-size:18px;">📄</span>
+            <span class="file-name" id="file-name-text"></span>
+            <span class="file-size" id="file-size-text"></span>
+            <button onclick="clearFile()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;" title="Remove">✕</button>
+          </div>
+        </div>
+
+        <button class="btn" id="ingest-btn" onclick="doIngest()" style="width:auto;padding:9px 24px;">Upload & Index</button>
+        <div id="ingest-result"></div>
+      </div>
+    </div>
+
+    <!-- stats -->
+    <div class="panel" id="panel-stats">
+      <div class="panel-body" style="max-width:860px;">
+        <div class="panel-heading">System Stats</div>
+        <div class="panel-sub">Live view of the indexed knowledge base and access control configuration.</div>
+
+        <div class="stats-grid" id="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Total Chunks</div>
+            <div class="stat-value" id="stat-chunks">—</div>
+            <div class="stat-sub">Indexed document chunks</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Your Role</div>
+            <div class="stat-value" id="stat-role" style="font-size:18px;padding-top:6px;">—</div>
+            <div class="stat-sub" id="stat-sources-count">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Collection</div>
+            <div class="stat-value" style="font-size:16px;padding-top:6px;font-family:var(--mono);" id="stat-collection">—</div>
+            <div class="stat-sub">ChromaDB collection</div>
+          </div>
+        </div>
+
+        <div style="margin-bottom:14px;">
+          <div class="sidebar-label" style="margin-bottom:12px;">Your Authorized Sources</div>
+          <table class="sources-table" id="sources-table">
+            <thead><tr><th>Source</th><th>Access</th><th>Description</th></tr></thead>
+            <tbody id="sources-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = 'http://localhost:8000/api/v1';
+
+const DEMO_USERS = [
+  { username: 'frank',  password: 'frank123',  role: 'admin',       color: '#f26b6b', emoji: '👑' },
+  { username: 'alice',  password: 'alice123',  role: 'finance',     color: '#4f9cf9', emoji: '💰' },
+  { username: 'bob',    password: 'bob123',    role: 'hr',          color: '#3ecf8e', emoji: '👥' },
+  { username: 'carol',  password: 'carol123',  role: 'engineering', color: '#a78bfa', emoji: '⚙️' },
+  { username: 'dave',   password: 'dave123',   role: 'legal',       color: '#f5a623', emoji: '⚖️' },
+  { username: 'eve',    password: 'eve123',    role: 'sales',       color: '#f26b6b', emoji: '📈' },
+  { username: 'guest',  password: 'guest123',  role: 'viewer',      color: '#8b90a0', emoji: '👁️' },
+];
+
+const SOURCE_DESC = {
+  finance_reports: 'P&L statements, budgets, forecasts',
+  hr_records: 'Employee data, policies, payroll',
+  engineering_docs: 'Architecture, APIs, runbooks',
+  legal_contracts: 'MSAs, NDAs, compliance docs',
+  sales_data: 'Pipeline, deals, CRM exports',
+  compliance: 'GDPR, SOX, audit trails',
+  operational: 'SLAs, incident reports, workflows',
+  public: 'General company info',
+};
+
+const EXAMPLE_QUERIES = {
+  finance: ['What was Q1 revenue?', 'Which department exceeded budget?', 'What is the EBITDA margin?'],
+  hr: ['How many leave days do employees get?', 'What is the performance review cycle?', 'Describe the remote work policy.'],
+  engineering: ['What known issues exist in the platform?', 'What API rate limits apply?', 'How does deployment work?'],
+  legal: ['What are the payment terms in the MSA?', 'How long is data retained post-termination?', 'What governs the Nexus contract?'],
+  sales: ['Show me the top deals in Q1', 'What is the MegaCorp deal status?', 'Who owns the TechGiant opportunity?'],
+  admin: ['What was Q1 revenue?', 'How many employees are on leave?', 'What are the known platform issues?'],
+  viewer: ['What data sources are available?'],
+  default: ['What information is available?', 'Summarize the knowledge base'],
+};
+
+let session = null;
+let selectedFile = null;
+
+function authHeader() {
+  if (!session) return {};
+  return { 'Authorization': 'Basic ' + btoa(session.username + ':' + session.password) };
+}
+
+async function apiFetch(path, opts = {}) {
+  const res = await fetch(API + path, {
+    ...opts,
+    headers: { ...authHeader(), ...(opts.headers || {}) },
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: res.statusText }));
+    throw new Error(err.detail || res.statusText);
+  }
+  return res.json();
+}
+
+async function doLogin() {
+  const u = document.getElementById('inp-user').value.trim();
+  const p = document.getElementById('inp-pass').value.trim();
+  if (!u || !p) return toast('Enter username and password', 'error');
+  try {
+    session = { username: u, password: p };
+    const me = await apiFetch('/me');
+    session.me = me;
+    onLoginSuccess(me);
+  } catch (e) {
+    session = null;
+    toast('Login failed: ' + e.message, 'error');
+  }
+}
+
+function onLoginSuccess(me) {
+  document.getElementById('login-section').style.display = 'none';
+  document.getElementById('user-section').style.display = 'flex';
+  document.getElementById('user-section').style.flexDirection = 'column';
+  document.getElementById('user-section').style.flex = '1';
+
+  document.getElementById('pill-name').textContent = me.name || me.username;
+  document.getElementById('pill-role').textContent = me.role;
+
+  const sc = document.getElementById('pill-sources');
+  sc.innerHTML = me.allowed_sources.map(s =>
+    `<span class="source-chip">${s}</span>`
+  ).join('');
+
+  document.getElementById('chat-auth-required').style.display = 'none';
+  document.getElementById('send-btn').disabled = false;
+
+  const queries = EXAMPLE_QUERIES[me.role] || EXAMPLE_QUERIES.default;
+  const eq = document.getElementById('example-queries');
+  eq.innerHTML = queries.map(q =>
+    `<div class="example-q" onclick="fillQuery('${q.replace(/'/g, "\\'")}')">${q}</div>`
+  ).join('');
+
+  document.getElementById('topbar-sub').textContent = me.name + ' · ' + me.role;
+  document.getElementById('input-hint').textContent = 'Enter ↵ to send · Shift+Enter for new line';
+
+  toast('Welcome, ' + (me.name || me.username), 'success');
+  checkServerStatus();
+  if (document.getElementById('panel-stats').classList.contains('active')) loadStats();
+}
+
+function doLogout() {
+  session = null;
+  document.getElementById('login-section').style.display = 'block';
+  document.getElementById('user-section').style.display = 'none';
+  document.getElementById('chat-auth-required').style.display = 'flex';
+  document.getElementById('send-btn').disabled = true;
+  document.getElementById('chat-messages').innerHTML = document.getElementById('chat-messages').innerHTML;
+  // Reset chat
+  document.getElementById('chat-messages').innerHTML = `<div class="empty-state" id="empty-state">
+    <div class="empty-icon">🔍</div>
+    <div class="empty-title">Ask anything across your data</div>
+    <div class="empty-sub">Sign in to start querying your enterprise knowledge base.</div>
+  </div>`;
+  document.getElementById('topbar-sub').textContent = 'Secure multi-source retrieval';
+  document.getElementById('input-hint').textContent = 'Sign in to start querying · Enter ↵ to send';
+}
+
+function buildDemoUsers() {
+  const el = document.getElementById('demo-users-list');
+  el.innerHTML = DEMO_USERS.map(u => `
+    <div class="demo-user" onclick="quickLogin('${u.username}','${u.password}')">
+      <div class="demo-avatar" style="background:${u.color}22;color:${u.color};">${u.emoji}</div>
+      <div class="demo-info">
+        <div class="demo-username">${u.username}</div>
+        <div class="demo-role-badge">${u.role}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function quickLogin(u, p) {
+  document.getElementById('inp-user').value = u;
+  document.getElementById('inp-pass').value = p;
+  doLogin();
+}
+
+function switchPanel(name, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  if (btn) btn.classList.add('active');
+
+  const titles = { chat: 'Query Assistant', ingest: 'Ingest Document', stats: 'System Stats' };
+  document.getElementById('topbar-title').textContent = titles[name] || name;
+
+  if (name === 'stats') loadStats();
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendQuery(); }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 140) + 'px';
+}
+
+function fillQuery(q) {
+  const ta = document.getElementById('chat-textarea');
+  ta.value = q;
+  autoResize(ta);
+  ta.focus();
+}
+
+async function sendQuery() {
+  if (!session) return;
+  const ta = document.getElementById('chat-textarea');
+  const query = ta.value.trim();
+  if (!query) return;
+
+  ta.value = '';
+  ta.style.height = 'auto';
+  const btn = document.getElementById('send-btn');
+  btn.disabled = true;
+
+  const es = document.getElementById('empty-state');
+  if (es) es.remove();
+
+  appendUserMsg(query);
+  const thinkId = appendThinking();
+
+  try {
+    const result = await apiFetch('/query', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query, k: 5 }),
+    });
+    removeThinking(thinkId);
+    appendAssistantMsg(result);
+  } catch (e) {
+    removeThinking(thinkId);
+    appendError(e.message);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function appendUserMsg(text) {
+  const msgs = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'msg user';
+  const initials = (session.me?.name || session.username).split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  div.innerHTML = `
+    <div class="msg-avatar">${initials}</div>
+    <div class="msg-body">
+      <div class="msg-bubble">${escHtml(text)}</div>
+    </div>`;
+  msgs.appendChild(div);
+  scrollToBottom();
+}
+
+function appendThinking() {
+  const msgs = document.getElementById('chat-messages');
+  const id = 'think-' + Date.now();
+  const div = document.createElement('div');
+  div.className = 'msg system';
+  div.id = id;
+  div.innerHTML = `
+    <div class="msg-avatar" style="font-size:18px;">🤖</div>
+    <div class="msg-body">
+      <div class="thinking">
+        <div class="dot-pulse"><span></span><span></span><span></span></div>
+        Retrieving from authorized sources…
+      </div>
+    </div>`;
+  msgs.appendChild(div);
+  scrollToBottom();
+  return id;
+}
+
+function removeThinking(id) {
+  const el = document.getElementById(id);
+  if (el) el.remove();
+}
+
+function appendAssistantMsg(r) {
+  const msgs = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'msg system';
+
+  const confClass = {
+    'High': 'confidence-high', 'Medium': 'confidence-medium', 'Low': 'confidence-low'
+  }[r.confidence] || 'confidence-low';
+
+  const sourceBadges = (r.sources_used || []).map(s =>
+    `<span class="badge source">📄 ${escHtml(s)}</span>`
+  ).join('');
+
+  const chunkId = 'chunks-' + Date.now();
+
+  let chunksHtml = '';
+  if (r.retrieved_chunks && r.retrieved_chunks.length) {
+    const cards = r.retrieved_chunks.map(c => `
+      <div class="chunk-card">
+        <div class="chunk-header">
+          <span class="chunk-source">${escHtml(c.source_name)} <span style="color:var(--text3);font-size:10px;">(${escHtml(c.source_type)})</span></span>
+          <span class="chunk-score">${(c.relevance_score * 100).toFixed(1)}% match</span>
+        </div>
+        <div class="chunk-snippet">${escHtml(c.snippet)}</div>
+        <div class="chunk-ref">ref: ${escHtml(c.ref)}</div>
+      </div>`).join('');
+    chunksHtml = `
+      <button class="chunks-toggle" onclick="toggleChunks('${chunkId}', this)">
+        ▶ Show ${r.retrieved_chunks.length} retrieved chunk${r.retrieved_chunks.length>1?'s':''}
+      </button>
+      <div class="chunks-panel" id="${chunkId}">${cards}</div>`;
+  }
+
+  const reasoningHtml = r.reasoning
+    ? `<div class="reasoning-block">💡 ${escHtml(r.reasoning)}</div>` : '';
+
+  div.innerHTML = `
+    <div class="msg-avatar" style="font-size:18px;">🤖</div>
+    <div class="msg-body" style="max-width:720px;">
+      <div class="msg-bubble" style="border-top-left-radius:4px;">
+        <div class="msg-answer">${escHtml(r.answer)}</div>
+        ${reasoningHtml}
+        <div class="msg-meta" style="margin-top:12px;">
+          <span class="badge ${confClass}">◆ ${escHtml(r.confidence)} confidence</span>
+          <span class="badge info">🔀 ${r.total_chunks_retrieved} chunks</span>
+          ${sourceBadges}
+        </div>
+        ${chunksHtml}
+      </div>
+    </div>`;
+  msgs.appendChild(div);
+  scrollToBottom();
+}
+
+function appendError(msg) {
+  const msgs = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'msg system';
+  div.innerHTML = `
+    <div class="msg-avatar" style="font-size:18px;">🤖</div>
+    <div class="msg-body">
+      <div class="error-msg">⚠ ${escHtml(msg)}</div>
+    </div>`;
+  msgs.appendChild(div);
+  scrollToBottom();
+}
+
+function toggleChunks(id, btn) {
+  const panel = document.getElementById(id);
+  const open = panel.classList.toggle('open');
+  btn.textContent = (open ? '▼ Hide ' : '▶ Show ') + panel.children.length + ' retrieved chunk' + (panel.children.length > 1 ? 's' : '');
+  if (open) scrollToBottom();
+}
+
+function scrollToBottom() {
+  const msgs = document.getElementById('chat-messages');
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function fileSelected(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  setFile(file);
+}
+
+function setFile(file) {
+  selectedFile = file;
+  document.getElementById('file-selected').style.display = 'flex';
+  document.getElementById('file-name-text').textContent = file.name;
+  document.getElementById('file-size-text').textContent = formatBytes(file.size);
+  document.querySelector('.dropzone').style.display = 'none';
+}
+
+function clearFile() {
+  selectedFile = null;
+  document.getElementById('file-selected').style.display = 'none';
+  document.getElementById('file-input').value = '';
+  document.querySelector('.dropzone').style.display = 'block';
+}
+
+function dropzone_dragover(e) {
+  e.preventDefault();
+  document.getElementById('dropzone').classList.add('drag');
+}
+function dropzone_dragleave(e) {
+  document.getElementById('dropzone').classList.remove('drag');
+}
+function dropzone_drop(e) {
+  e.preventDefault();
+  document.getElementById('dropzone').classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if (file) setFile(file);
+}
+
+async function doIngest() {
+  if (!session) return toast('Not signed in', 'error');
+  if (!selectedFile) return toast('Select a file first', 'error');
+
+  const btn = document.getElementById('ingest-btn');
+  btn.textContent = 'Uploading…';
+  btn.disabled = true;
+
+  const formData = new FormData();
+  formData.append('file', selectedFile);
+  formData.append('source_type', document.getElementById('source-type').value);
+
+  const res = document.getElementById('ingest-result');
+  res.innerHTML = '';
+
+  try {
+    const result = await fetch(API + '/ingest', {
+      method: 'POST',
+      headers: authHeader(),
+      body: formData,
+    });
+    const data = await result.json();
+    if (!result.ok) throw new Error(data.detail || result.statusText);
+
+    res.innerHTML = `<div class="ingest-result success">
+      ✓ Indexed <strong>${data.chunks_indexed}</strong> chunks from <code>${escHtml(data.file)}</code>
+      into <strong>${escHtml(data.source_type)}</strong>
+    </div>`;
+    toast('Document indexed successfully', 'success');
+    clearFile();
+  } catch (e) {
+    res.innerHTML = `<div class="ingest-result error">✗ ${escHtml(e.message)}</div>`;
+    toast('Ingest failed', 'error');
+  } finally {
+    btn.textContent = 'Upload & Index';
+    btn.disabled = false;
+  }
+}
+
+async function loadStats() {
+  if (!session) return;
+  try {
+    const stats = await apiFetch('/stats');
+    document.getElementById('stat-chunks').textContent = stats.total_documents ?? '—';
+    document.getElementById('stat-collection').textContent = stats.collection ?? 'enterprise_rag';
+    document.getElementById('stat-role').textContent = session.me?.role ?? '—';
+
+    const sources = stats.your_allowed_sources || stats.all_sources || session.me?.allowed_sources || [];
+    document.getElementById('stat-sources-count').textContent = sources.length + ' data sources';
+
+    const tbody = document.getElementById('sources-tbody');
+    tbody.innerHTML = sources.map(s => `
+      <tr>
+        <td><span class="badge source" style="font-size:12px;">📂 ${escHtml(s)}</span></td>
+        <td><span class="badge confidence-high" style="font-size:11px;">✓ Authorized</span></td>
+        <td style="color:var(--text2);font-size:13px;">${escHtml(SOURCE_DESC[s] || '')}</td>
+      </tr>`).join('');
+  } catch (e) {
+    console.warn('Stats error:', e);
+  }
+}
+
+async function checkServerStatus() {
+  const dot = document.getElementById('status-dot');
+  try {
+    const r = await fetch(API + '/health');
+    dot.className = r.ok ? 'status-dot' : 'status-dot offline';
+  } catch {
+    dot.className = 'status-dot offline';
+  }
+}
+
+function escHtml(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function formatBytes(b) {
+  if (b < 1024) return b + ' B';
+  if (b < 1024*1024) return (b/1024).toFixed(1) + ' KB';
+  return (b/1024/1024).toFixed(1) + ' MB';
+}
+
+let toastTimer;
+function toast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.className = 'toast', 2800);
+}
+
+buildDemoUsers();
+checkServerStatus();
+setInterval(checkServerStatus, 30000);
+
+document.getElementById('inp-pass').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+</script>
+</body>
+</html>

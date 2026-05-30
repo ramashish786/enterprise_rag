@@ -1,0 +1,8 @@
+username,full_name,role,department,join_date,status
+alice,Alice Chen,finance,Finance,2021-03-15,active
+bob,Bob Martinez,hr,People,2020-08-01,active
+carol,Carol Singh,engineering,Platform,2022-01-10,active
+dave,Dave Kim,legal,Legal,2019-11-20,active
+eve,Eve Thompson,sales,Revenue,2023-04-05,active
+frank,Frank Admin,admin,IT Operations,2018-06-01,active
+guest,Guest User,viewer,External,2024-01-01,active

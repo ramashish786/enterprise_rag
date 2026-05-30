@@ -1,0 +1,502 @@
+[
+  {
+    "event_id": "EVT10000",
+    "timestamp": "2024-03-23T17:14:00Z",
+    "event_type": "DOCUMENT_ACCESS",
+    "user": "alice",
+    "ip_address": "192.168.2.211",
+    "resource": "finance_reports",
+    "status": "SUCCESS",
+    "details": "Action performed on resource"
+  },
+  {
+    "event_id": "EVT10001",
+    "timestamp": "2024-03-13T08:04:00Z",
+    "event_type": "QUERY",
+    "user": "eve",
+    "ip_address": "192.168.3.55",
+    "resource": "legal_contracts",
+    "status": "DENIED",
+    "details": "Action performed on resource"
+  },
+  {
+    "event_id": "EVT10002",
+    "timestamp": "2024-03-29T20:29:00Z",
+    "event_type": "QUERY",
+    "user": "carol",
+    "ip_address": "192.168.2.64",
+    "resource": "engineering_docs",
+    "status": "FAILED",
+    "details": "Action performed on resource"
+  },
+  {
+    "event_id": "EVT10003",
+    "timestamp": "2024-03-14T18:25:00Z",
+    "event_type": "DOCUMENT_ACCESS",
+    "user": "bob",
+    "ip_address": "192.168.2.131",
+    "resource": "legal_contracts",
+    "status": "SUCCESS",
+    "details": "Action performed on resource"
+  },
+  {
+    "event_id": "EVT10004",
+    "timestamp": "2024-03-25T01:55:00Z",
+    "event_type": "LOGIN",
+    "user": "bob",
+    "ip_address": "192.168.2.203",
+    "resource": "legal_contracts",
+    "status": "FAILED",
+    "details": "Action performed on resource"
+  },
+  {
+    "event_id": "EVT10005",
+    "timestamp": "2024-03-03T12:24:00Z",
+    "event_type": "DATA_EXPORT",
+    "user": "dave",
+    "ip_address": "192.168.5.65",
+    "resource": "finance_reports",
+    "status": "SUCCESS",
+    "details": "Action performed on resource"
+  },
+  {
+    "event_id": "EVT10006",
+    "timestamp": "2024-03-22T17:48:00Z",
+    "event_type": "DOCUMENT_ACCESS",
+    "user": "frank",
+    "ip_address": "192.168.3.29",
+    "resource": "engineering_docs",
+    "status": "DENIED",
+    "details": "Action performed on resource"
+  },
+  {
+    "event_id": "EVT10007",
+    "timestamp": "2024-03-06T14:00:00Z",
+    "event_type": "DOCUMENT_ACCESS",
+    "user": "eve",
+    "ip_address": "192.168.2.130",
+    "resource": "finance_reports",
+    "status": "SUCCESS",
+    "details": "Action performed on resource"
+  },
+  {
+    "event_id": "EVT10008",
+    "timestamp": "2024-03-27T20:32:00Z",
+    "event_type": "DATA_EXPORT",
+    "user": "bob",
+    "ip_address": "192.168.2.96",
+    "resource": "hr_records",
+    "status": "FAILED",
+    "details": "Action performed on resource"
+  },
+  {
+    "event_id": "EVT10009",
+    "timestamp": "2024-03-31T16:58:00Z",
+    "event_type": "LOGIN",
+    "user": "eve",
+    "ip_address": "192.168.3.126",
+    "resource": "finance_reports",
+    "status": "SUCCESS",
+    "details": "Action performed on resource"
+  },
+  {
+    "event_id": "EVT10010",
+    "timestamp": "2024-03-30T11:56:00Z",
+    "event_type": "DOCUMENT_ACCESS",
+    "user": "bob",
+    "ip_address": "192.168.1.62",
+    "resource": "finance_reports",
+    "status": "SUCCESS",
+    "details": "Action performed on resource"
+  },
+  {
+    "event_id": "EVT10011",
+    "timestamp": "2024-03-24T15:52:00Z",
+    "event_type": "LOGIN",
+    "user": "eve",
+    "ip_address": "192.168.2.33",
+    "resource": "legal_contracts",
+    "status": "FAILED",
+    "details": "Action performed on resource"
+  },
+  {
+    "event_id": "EVT10012",
+    "timestamp": "2024-03-06T08:33:00Z",
+    "event_type": "DATA_EXPORT",
+    "user": "dave",
+    "ip_address": "192.168.2.238",
+    "resource": "hr_records",
+    "status": "SUCCESS",
+    "details": "Action performed on resource"
+  },
+  {
+    "event_id": "EVT10013",
+    "timestamp": "2024-03-13T21:41:00Z",
+    "event_type": "DOCUMENT_ACCESS",
+    "user": "dave",
+    "ip_address": "192.168.5.116",
+    "resource": "finance_reports",
+    "status": "SUCCESS",
+    "details": "Action performed on resource"
+  },
+  {
+    "event_id": "EVT10014",
+    "timestamp": "2024-03-08T02:21:00Z",
+    "event_type": "LOGIN",
+    "user": "eve",
+    "ip_address": "192.168.5.59",
+    "resource": "hr_records",
+    "status": "SUCCESS",
+    "details": "Action performed on resource"
+  },
+  {
+    "event_id": "EVT10015",
+    "timestamp": "2024-03-03T22:40:00Z",
+    "event_type": "LOGIN",
+    "user": "bob",
+    "ip_address": "192.168.1.232",
+    "resource": "finance_reports",
+    "status": "SUCCESS",
+    "details": "Action performed on resource"
+  },
+  {
+    "event_id": "EVT10016",
+    "timestamp": "2024-03-03T16:15:00Z",
+    "event_type": "DOCUMENT_ACCESS",
+    "user": "frank",
+    "ip_address": "192.168.4.55",
+    "resource": "hr_records",
+    "status": "FAILED",
+    "details": "Action performed on resource"
+  },
+  {
+    "event_id": "EVT10017",
+    "timestamp": "2024-03-19T15:15:00Z",
+    "event_type": "PERMISSION_CHANGE",
+    "user": "dave",
+    "ip_address": "192.168.2.25",
+    "resource": "finance_reports",
+    "status": "DENIED",
+    "details": "Action performed on resource"
+  },
+  {
+    "event_id": "EVT10018",
+    "timestamp": "2024-03-12T13:26:00Z",
+    "event_type": "PERMISSION_CHANGE",
+    "user": "frank",
+    "ip_address": "192.168.1.173",
+    "resource": "finance_reports",
+    "status": "SUCCESS",
+    "details": "Action performed on resource"
+  },
+  {
+    "event_id": "EVT10019",
+    "timestamp": "2024-03-13T23:21:00Z",
+    "event_type": "LOGIN",
+    "user": "bob",
+    "ip_address": "192.168.2.49",
+    "resource": "legal_contracts",
+    "status": "SUCCESS",
+    "details": "Action performed on resource"
+  },
+  {
+    "event_id": "EVT10020",
+    "timestamp": "2024-03-14T05:17:00Z",
+    "event_type": "PERMISSION_CHANGE",
+    "user": "bob",
+    "ip_address": "192.168.1.114",
+    "resource": "finance_reports",
+    "status": "SUCCESS",
+    "details": "Action performed on resource"
+  },
+  {
+    "event_id": "EVT10021",
+    "timestamp": "2024-03-21T17:53:00Z",
+    "event_type": "LOGIN",
+    "user": "alice",
+    "ip_address": "192.168.2.43",
+    "resource": "legal_contracts",
+    "status": "DENIED",
+    "details": "Action performed on resource"
+  },
+  {
+    "event_id": "EVT10022",
+    "timestamp": "2024-03-16T06:55:00Z",
+    "event_type": "PERMISSION_CHANGE",
+    "user": "alice",
+    "ip_address": "192.168.2.98",
+    "resource": "finance_reports",
+    "status": "DENIED",
+    "details": "Action performed on resource"
+  },
+  {
+    "event_id": "EVT10023",
+    "timestamp": "2024-03-09T14:18:00Z",
+    "event_type": "PERMISSION_CHANGE",
+    "user": "frank",
+    "ip_address": "192.168.5.170",
+    "resource": "legal_contracts",
+    "status": "SUCCESS",
+    "details": "Action performed on resource"
+  },
+  {
+    "event_id": "EVT10024",
+    "timestamp": "2024-03-07T09:13:00Z",
+    "event_type": "LOGIN",
+    "user": "eve",
+    "ip_address": "192.168.5.16",
+    "resource": "engineering_docs",
+    "status": "SUCCESS",
+    "details": "Action performed on resource"
+  },
+  {
+    "event_id": "EVT10025",
+    "timestamp": "2024-03-02T18:30:00Z",
+    "event_type": "DATA_EXPORT",
+    "user": "eve",
+    "ip_address": "192.168.2.15",
+    "resource": "finance_reports",
+    "status": "SUCCESS",
+    "details": "Action performed on resource"
+  },
+  {
+    "event_id": "EVT10026",
+    "timestamp": "2024-03-03T19:04:00Z",
+    "event_type": "QUERY",
+    "user": "dave",
+    "ip_address": "192.168.1.242",
+    "resource": "hr_records",
+    "status": "FAILED",
+    "details": "Action performed on resource"
+  },
+  {
+    "event_id": "EVT10027",
+    "timestamp": "2024-03-20T01:39:00Z",
+    "event_type": "LOGIN",
+    "user": "dave",
+    "ip_address": "192.168.5.145",
+    "resource": "engineering_docs",
+    "status": "SUCCESS",
+    "details": "Action performed on resource"
+  },
+  {
+    "event_id": "EVT10028",
+    "timestamp": "2024-03-07T21:45:00Z",
+    "event_type": "DOCUMENT_ACCESS",
+    "user": "bob",
+    "ip_address": "192.168.3.102",
+    "resource": "hr_records",
+    "status": "SUCCESS",
+    "details": "Action performed on resource"
+  },
+  {
+    "event_id": "EVT10029",
+    "timestamp": "2024-03-15T10:59:00Z",
+    "event_type": "LOGIN",
+    "user": "alice",
+    "ip_address": "192.168.4.160",
+    "resource": "finance_reports",
+    "status": "SUCCESS",
+    "details": "Action performed on resource"
+  },
+  {
+    "event_id": "EVT10030",
+    "timestamp": "2024-03-18T06:32:00Z",
+    "event_type": "DOCUMENT_ACCESS",
+    "user": "bob",
+    "ip_address": "192.168.3.226",
+    "resource": "finance_reports",
+    "status": "SUCCESS",
+    "details": "Action performed on resource"
+  },
+  {
+    "event_id": "EVT10031",
+    "timestamp": "2024-03-12T09:10:00Z",
+    "event_type": "PERMISSION_CHANGE",
+    "user": "eve",
+    "ip_address": "192.168.3.157",
+    "resource": "finance_reports",
+    "status": "FAILED",
+    "details": "Action performed on resource"
+  },
+  {
+    "event_id": "EVT10032",
+    "timestamp": "2024-03-10T21:06:00Z",
+    "event_type": "QUERY",
+    "user": "carol",
+    "ip_address": "192.168.1.228",
+    "resource": "finance_reports",
+    "status": "FAILED",
+    "details": "Action performed on resource"
+  },
+  {
+    "event_id": "EVT10033",
+    "timestamp": "2024-03-05T08:18:00Z",
+    "event_type": "DATA_EXPORT",
+    "user": "bob",
+    "ip_address": "192.168.3.53",
+    "resource": "engineering_docs",
+    "status": "FAILED",
+    "details": "Action performed on resource"
+  },
+  {
+    "event_id": "EVT10034",
+    "timestamp": "2024-03-16T08:57:00Z",
+    "event_type": "LOGIN",
+    "user": "alice",
+    "ip_address": "192.168.4.213",
+    "resource": "engineering_docs",
+    "status": "SUCCESS",
+    "details": "Action performed on resource"
+  },
+  {
+    "event_id": "EVT10035",
+    "timestamp": "2024-03-01T10:49:00Z",
+    "event_type": "QUERY",
+    "user": "frank",
+    "ip_address": "192.168.3.42",
+    "resource": "legal_contracts",
+    "status": "FAILED",
+    "details": "Action performed on resource"
+  },
+  {
+    "event_id": "EVT10036",
+    "timestamp": "2024-03-23T13:35:00Z",
+    "event_type": "LOGIN",
+    "user": "alice",
+    "ip_address": "192.168.1.242",
+    "resource": "hr_records",
+    "status": "FAILED",
+    "details": "Action performed on resource"
+  },
+  {
+    "event_id": "EVT10037",
+    "timestamp": "2024-03-02T11:37:00Z",
+    "event_type": "DATA_EXPORT",
+    "user": "bob",
+    "ip_address": "192.168.4.33",
+    "resource": "finance_reports",
+    "status": "SUCCESS",
+    "details": "Action performed on resource"
+  },
+  {
+    "event_id": "EVT10038",
+    "timestamp": "2024-03-12T01:57:00Z",
+    "event_type": "DOCUMENT_ACCESS",
+    "user": "bob",
+    "ip_address": "192.168.2.171",
+    "resource": "finance_reports",
+    "status": "SUCCESS",
+    "details": "Action performed on resource"
+  },
+  {
+    "event_id": "EVT10039",
+    "timestamp": "2024-03-25T17:56:00Z",
+    "event_type": "PERMISSION_CHANGE",
+    "user": "eve",
+    "ip_address": "192.168.2.237",
+    "resource": "hr_records",
+    "status": "SUCCESS",
+    "details": "Action performed on resource"
+  },
+  {
+    "event_id": "EVT10040",
+    "timestamp": "2024-03-26T05:56:00Z",
+    "event_type": "PERMISSION_CHANGE",
+    "user": "alice",
+    "ip_address": "192.168.2.189",
+    "resource": "engineering_docs",
+    "status": "DENIED",
+    "details": "Action performed on resource"
+  },
+  {
+    "event_id": "EVT10041",
+    "timestamp": "2024-03-26T21:55:00Z",
+    "event_type": "QUERY",
+    "user": "carol",
+    "ip_address": "192.168.2.202",
+    "resource": "finance_reports",
+    "status": "DENIED",
+    "details": "Action performed on resource"
+  },
+  {
+    "event_id": "EVT10042",
+    "timestamp": "2024-03-28T01:54:00Z",
+    "event_type": "PERMISSION_CHANGE",
+    "user": "bob",
+    "ip_address": "192.168.2.210",
+    "resource": "legal_contracts",
+    "status": "SUCCESS",
+    "details": "Action performed on resource"
+  },
+  {
+    "event_id": "EVT10043",
+    "timestamp": "2024-03-10T07:14:00Z",
+    "event_type": "LOGIN",
+    "user": "frank",
+    "ip_address": "192.168.2.103",
+    "resource": "engineering_docs",
+    "status": "SUCCESS",
+    "details": "Action performed on resource"
+  },
+  {
+    "event_id": "EVT10044",
+    "timestamp": "2024-03-28T02:49:00Z",
+    "event_type": "DOCUMENT_ACCESS",
+    "user": "carol",
+    "ip_address": "192.168.5.103",
+    "resource": "engineering_docs",
+    "status": "SUCCESS",
+    "details": "Action performed on resource"
+  },
+  {
+    "event_id": "EVT10045",
+    "timestamp": "2024-03-04T08:11:00Z",
+    "event_type": "DATA_EXPORT",
+    "user": "carol",
+    "ip_address": "192.168.1.28",
+    "resource": "legal_contracts",
+    "status": "SUCCESS",
+    "details": "Action performed on resource"
+  },
+  {
+    "event_id": "EVT10046",
+    "timestamp": "2024-03-24T10:27:00Z",
+    "event_type": "DATA_EXPORT",
+    "user": "eve",
+    "ip_address": "192.168.1.99",
+    "resource": "hr_records",
+    "status": "SUCCESS",
+    "details": "Action performed on resource"
+  },
+  {
+    "event_id": "EVT10047",
+    "timestamp": "2024-03-02T22:27:00Z",
+    "event_type": "LOGIN",
+    "user": "eve",
+    "ip_address": "192.168.5.176",
+    "resource": "hr_records",
+    "status": "SUCCESS",
+    "details": "Action performed on resource"
+  },
+  {
+    "event_id": "EVT10048",
+    "timestamp": "2024-03-14T02:42:00Z",
+    "event_type": "DOCUMENT_ACCESS",
+    "user": "eve",
+    "ip_address": "192.168.3.170",
+    "resource": "finance_reports",
+    "status": "SUCCESS",
+    "details": "Action performed on resource"
+  },
+  {
+    "event_id": "EVT10049",
+    "timestamp": "2024-03-17T09:42:00Z",
+    "event_type": "PERMISSION_CHANGE",
+    "user": "carol",
+    "ip_address": "192.168.4.179",
+    "resource": "engineering_docs",
+    "status": "FAILED",
+    "details": "Action performed on resource"
+  }
+]

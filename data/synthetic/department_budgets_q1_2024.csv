@@ -1,0 +1,9 @@
+Department,Budget_USD,Actual_USD,Variance_USD,Status
+Engineering,12000000,11400000,600000,Under Budget
+Sales,8500000,8900000,-400000,Over Budget
+Marketing,4200000,3980000,220000,Under Budget
+HR,2100000,2050000,50000,On Track
+Legal,1800000,1760000,40000,On Track
+Infrastructure,6500000,7300000,-800000,Over Budget
+Finance,1200000,1180000,20000,On Track
+Operations,3000000,2950000,50000,On Track

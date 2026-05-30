@@ -1,0 +1,43 @@
+ACME Platform Architecture — Internal Engineering Documentation
+Version 2.1 | Owner: Platform Team | Last Updated: March 2024
+
+SYSTEM OVERVIEW
+The ACME platform is built on a microservices architecture deployed on AWS EKS.
+Core services communicate over gRPC internally and expose REST APIs externally.
+
+SERVICES INVENTORY
+- auth-service: OAuth2/JWT token issuance, 99.95% SLA
+- user-service: User profile management, PostgreSQL backend
+- payment-service: Stripe integration, PCI-DSS compliant
+- notification-service: Email/SMS via SendGrid/Twilio
+- analytics-service: ClickHouse OLAP backend, real-time dashboards
+- rag-service: Internal document Q&A (this system)
+
+INFRASTRUCTURE
+Cloud: AWS (primary), GCP (ML workloads)
+Orchestration: Kubernetes 1.29, Helm 3
+CI/CD: GitHub Actions → ArgoCD
+Observability: Datadog APM, PagerDuty alerts
+Databases: PostgreSQL 15, Redis 7, ClickHouse 23.8
+
+DEPLOYMENT PROCEDURE
+1. PR merged to main → GitHub Actions runs tests (unit, integration, e2e)
+2. Docker image built and pushed to ECR with SHA tag
+3. Helm values updated in gitops-repo → ArgoCD syncs within 5 min
+4. Smoke tests run automatically post-deploy
+5. Rollback: `kubectl rollout undo deployment/<name>` or ArgoCD UI
+
+KNOWN ISSUES (Q1 2024)
+- auth-service memory leak under sustained 2000+ RPS (P1, ETA fix: 2024-04-15)
+- analytics-service query timeout at >10M row scans (workaround: add date filter)
+- notification-service: SendGrid rate limit at 100k emails/hr (mitigation: queue)
+
+API RATE LIMITS (External)
+- Standard tier: 100 req/min
+- Professional tier: 1000 req/min
+- Enterprise tier: Custom (contact sales)
+
+SECURITY
+All inter-service communication uses mTLS.
+Secrets managed via AWS Secrets Manager.
+Penetration test last conducted: December 2023 (no critical findings).

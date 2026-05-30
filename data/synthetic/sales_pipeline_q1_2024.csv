@@ -1,0 +1,11 @@
+Deal_ID,Account,ACV_USD,Stage,Close_Date,Owner,Probability_Pct
+DL-001,TechGiant Corp,480000,Negotiation,2024-03-31,Eve Thompson,75
+DL-002,GlobalBank Ltd,220000,Proposal,2024-04-15,Eve Thompson,50
+DL-003,HealthSys Inc,95000,Discovery,2024-05-30,Mark Johnson,25
+DL-004,RetailMax Co,360000,Closed Won,2024-02-28,Eve Thompson,100
+DL-005,StartupX,42000,Proposal,2024-04-01,Anna Lee,60
+DL-006,MegaCorp,1200000,Negotiation,2024-06-30,Eve Thompson,65
+DL-007,EduTech Ltd,78000,Closed Won,2024-01-15,Mark Johnson,100
+DL-008,FinancePro,540000,Discovery,2024-07-31,Anna Lee,20
+DL-009,GovSector Agency,290000,Proposal,2024-05-15,Mark Johnson,45
+DL-010,InsuranceCo,175000,Closed Lost,2024-02-01,Anna Lee,0
