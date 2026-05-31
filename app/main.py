@@ -45,14 +45,25 @@ app.add_middleware(
 
 app.include_router(router, prefix="/api/v1")
 
-FRONTEND_DIR = Path(__file__).parent.parent / "frontend"
+DIST_DIR = Path(__file__).parent.parent / "frontend" / "dist"
 
-if FRONTEND_DIR.exists():
-    app.mount("/static", StaticFiles(directory=str(FRONTEND_DIR)), name="static")
+if DIST_DIR.exists():
+    # Serve Vite's hashed JS/CSS bundles
+    assets_dir = DIST_DIR / "assets"
+    if assets_dir.exists():
+        app.mount("/assets", StaticFiles(directory=str(assets_dir)), name="assets")
 
     @app.get("/")
     def root():
-        return FileResponse(str(FRONTEND_DIR / "index.html"))
+        return FileResponse(str(DIST_DIR / "index.html"))
+
+    # Catch-all: return index.html for any non-API path (SPA client-side routing)
+    @app.get("/{path:path}")
+    def spa_fallback(path: str):
+        file = DIST_DIR / path
+        if file.exists() and file.is_file():
+            return FileResponse(str(file))
+        return FileResponse(str(DIST_DIR / "index.html"))
 else:
     @app.get("/")
     def root():

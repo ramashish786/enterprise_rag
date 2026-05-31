@@ -8,6 +8,7 @@ langchain-openai==0.1.14
 langchain-text-splitters==0.2.2
 sentence-transformers==3.0.1
 chromadb==0.5.3
+posthog>=2.4.0,<3.0.0
 pydantic==2.7.4
 python-multipart==0.0.9
 pypdf==4.2.0

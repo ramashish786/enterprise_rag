@@ -11,7 +11,7 @@
 7. [Vector Store — app/core/vectorstore.py](#7-vector-store--appcorevectorstorey)
 8. [RAG Pipeline — app/core/rag_pipeline.py](#8-rag-pipeline--appcorerag_pipelinepy)
 9. [PostgreSQL Source — app/core/postgres_source.py](#9-postgresql-source--appCorepostgres_sourcepy)
-10. [Frontend — frontend/index.html](#10-frontend--frontendindexhtml)
+10. [Frontend — React App (frontend/src/)](#10-frontend--react-app-frontendsrc)
 11. [Infrastructure — docker-compose.yml & Dockerfile](#11-infrastructure--docker-composeyml--dockerfile)
 12. [Synthetic Data — data/synthetic/](#12-synthetic-data--datasynthetic)
 13. [Dependencies — requirements.txt](#13-dependencies--requirementstxt)
@@ -48,25 +48,36 @@ OpenAI LLM  (gpt-4o-mini / gpt-4o)
 ```
 enterprise_rag/
 ├── app/
-│   ├── main.py                  # FastAPI app factory + server startup
+│   ├── main.py                  # FastAPI app factory — serves frontend/dist/
 │   ├── api/
-│   │   └── routes.py            # All HTTP endpoints
+│   │   └── routes.py            # All HTTP endpoints (incl. /documents CRUD)
 │   └── core/
 │       ├── rbac.py              # Roles, permissions, authentication
 │       ├── ingestion.py         # File parsing and chunking
-│       ├── vectorstore.py       # ChromaDB read/write + RBAC-filtered retrieval
+│       ├── vectorstore.py       # ChromaDB: add/list/delete + RBAC retrieval
 │       ├── rag_pipeline.py      # Query routing, LLM prompting, response parsing
 │       └── postgres_source.py   # PostgreSQL schema, seeding, text-to-SQL
 ├── frontend/
-│   └── index.html               # Single-page web UI
+│   ├── package.json             # React + Vite
+│   ├── vite.config.js           # Build config + /api proxy for local dev
+│   ├── index.html               # Vite HTML shell
+│   └── src/
+│       ├── main.jsx / App.jsx   # React root + layout
+│       ├── api.js               # Authenticated fetch helper
+│       ├── constants.js         # Demo users, source descriptions, example queries
+│       ├── index.css            # Global dark-theme CSS
+│       ├── contexts/            # AuthContext, ToastContext
+│       └── components/
+│           ├── Sidebar / LoginCard / UserPill / DemoUsers
+│           └── panels/          # QueryPanel, IngestPanel, DocsPanel, StatsPanel
 ├── data/
 │   └── synthetic/               # Pre-generated sample documents
 ├── scripts/
-│   └── ingest_all.py            # One-shot data generation + indexing
+│   └── ingest_all.py            # Data generation + indexing (sentinel-guarded)
 ├── tests/
 │   └── test_rag_system.py       # Unit and integration tests
-├── docker-compose.yml           # Postgres + FastAPI service definitions
-├── Dockerfile                   # Container image build
+├── docker-compose.yml           # Postgres + FastAPI + React service definitions
+├── Dockerfile                   # Multi-stage: Node (React build) → Python (API)
 ├── requirements.txt             # Python dependencies
 └── .env                         # API keys and environment config
 ```
@@ -483,60 +494,95 @@ The system supports two types of data: unstructured documents (PDFs, CSVs, etc. 
 
 ---
 
-## 10. Frontend — `frontend/index.html`
+## 10. Frontend — React App (`frontend/src/`)
 
 ### What it does
 
-A self-contained single-page application delivered as one HTML file. It provides a chat interface, a document upload form, a system stats dashboard, and a document management panel — all in a dark-themed UI.
+A modular React single-page application built with **Vite**. The old monolithic `index.html` has been replaced by a proper component tree. FastAPI serves the compiled output from `frontend/dist/`. During local development the Vite dev server (`npm run dev`) proxies API calls to the FastAPI backend.
+
+### Component tree
+
+```
+App.jsx                      ← layout shell, panel routing, server status polling
+├── Sidebar.jsx              ← logo, login/nav/sign-out
+│   ├── LoginCard.jsx        ← username + password form
+│   ├── UserPill.jsx         ← logged-in user badge with source chips
+│   └── DemoUsers.jsx        ← quick-login demo account pills
+└── panels/
+    ├── QueryPanel.jsx       ← chat messages, chunk viewer, auth overlay
+    ├── IngestPanel.jsx      ← drag-drop upload + source type selector (admin)
+    ├── DocsPanel.jsx        ← indexed document table + delete (admin)
+    └── StatsPanel.jsx       ← stats cards + authorized sources table
+```
+
+### Key source files
+
+| File | Purpose |
+|---|---|
+| `src/api.js` | `apiFetch()` — adds `Authorization: Basic` header; uses relative `/api/v1` paths so it works both when served by FastAPI and via the Vite proxy |
+| `src/constants.js` | `DEMO_USERS`, `SOURCE_DESC`, `EXAMPLE_QUERIES` — shared across components |
+| `src/index.css` | Global dark-theme CSS (same design tokens and class names as the original HTML) |
+| `src/contexts/AuthContext.jsx` | Session state (`session`, `login`, `logout`, `authFetch`); restores credentials from `localStorage` on page load so refreshing never logs the user out |
+| `src/contexts/ToastContext.jsx` | `showToast(msg, type)` — renders a fixed-position toast; consumed via `useToast()` hook |
 
 ### Panels
 
-**Query Assistant** (`panel-chat`)
+**QueryPanel** — chat interface. Maintains a local `messages` array. Sends `POST /query`, appends user/assistant/error messages, auto-scrolls. Sub-components: `UserMessage`, `AssistantMessage`, `ThinkingBubble`, `ChunkViewer`, `ErrorMessage`. Shows an auth overlay when no session is active.
 
-The main interface. The user types a question, the frontend calls `POST /query`, and the response is rendered as a chat bubble with:
-- The grounded answer
-- Inline reasoning block
-- Confidence badge (colour-coded: green = High, amber = Medium, red = Low)
-- Source badges (one per cited document)
-- Collapsible "retrieved chunks" section showing each chunk's source, relevance score (%), and snippet
+**IngestPanel** — admin only. Drag-and-drop or file-picker, source type dropdown, `POST /ingest` via `FormData`. Displays chunk count on success.
 
-**Ingest Document** (`panel-ingest`)
+**DocsPanel** — admin only. Loads `GET /documents` on mount and on Refresh. Each row has a Delete button that calls `DELETE /documents/{source_name}` after a `confirm()` dialog.
 
-An admin-only form with a drag-and-drop file zone and a source type selector. Submits to `POST /ingest` via `FormData`. Displays success (chunk count) or error in a styled result block.
+**StatsPanel** — loads `GET /stats` on mount. Shows total chunks (with "system-wide" label for non-admin), role, collection name, and a table of authorized sources.
 
-**Manage Documents** (`panel-docs`) — admin only
+### Authentication & session persistence
 
-Shows a table of all indexed documents returned by `GET /documents`. Each row has the document name, source type, chunk count, and a Delete button. Clicking Delete triggers a `confirm()` dialog, then `DELETE /documents/{source_name}`, then refreshes the list.
-
-**System Stats** (`panel-stats`)
-
-Three stat cards (total chunks, user's role, collection name) plus a table of the current user's authorised sources with descriptions. Populated by `GET /stats`.
-
-### Authentication
-
-- Login form with username/password fields + quick-login demo user buttons
-- On successful login, stores `{ username, password }` in `localStorage` so the session survives page refreshes
-- On page load, reads `localStorage`, calls `GET /me` to validate, and restores the session silently
-- On logout, clears `localStorage` and resets the UI
-- All API calls include `Authorization: Basic <base64(user:pass)>` via the `authHeader()` helper
+- `AuthContext` calls `GET /me` on page load with credentials saved in `localStorage`. If valid, the session is restored silently. If invalid (e.g. password changed), the saved entry is cleared.
+- `login()` saves `{ username, password }` to `localStorage` after a successful `GET /me`.
+- `logout()` clears `localStorage` and resets session state.
+- `authFetch()` is a pre-bound wrapper around `apiFetch()` that automatically injects the current session's credentials — components never touch auth headers directly.
 
 ### Role-based UI visibility
 
-- The **Manage Documents** nav item is shown only when `me.role === 'admin'`
-- Other non-admin users never see or can navigate to the delete functionality — the server enforces this too, but the UI respects it as well
+- `Sidebar.jsx` filters `NAV_ITEMS` by `adminOnly` flag — **Ingest Document** and **Manage Documents** are hidden for non-admin roles at the component level.
+- The server enforces the same admin check independently on every request.
 
-### Why it exists as one file
+### Build & dev workflow
 
-Keeping the entire frontend in a single HTML file makes deployment trivial — FastAPI serves it as a static file, no build step, no bundler, no Node.js needed. For a demo/enterprise-internal tool this is a pragmatic choice.
+| Action | Command |
+|---|---|
+| Build for production | `cd frontend && npm run build` → outputs to `frontend/dist/` |
+| Local dev with HMR | `cd frontend && npm run dev` → `http://localhost:5173` (proxies `/api` to `localhost:8000`) |
+| Docker (serves built dist) | `docker compose up --build -d` |
 
 ### Used by
 
-- Served by FastAPI's static file middleware at `GET /`
+- `app/main.py` serves `frontend/dist/assets/` at `/assets/` and `dist/index.html` at `/`
 - Communicates with all `/api/v1/*` endpoints
 
 ---
 
 ## 11. Infrastructure — `docker-compose.yml` & `Dockerfile`
+
+### `Dockerfile` — multi-stage build
+
+**Stage 1 — `frontend-build` (Node 20)**
+
+1. Copies `frontend/package.json` and runs `npm install`
+2. Copies all frontend source and runs `npm run build`
+3. Outputs compiled assets to `/build/dist/`
+
+**Stage 2 — Python backend**
+
+1. Starts from `python:3.11-slim`
+2. Installs system dependencies (`build-essential`, `curl`)
+3. Installs all Python dependencies from `requirements.txt`
+4. Copies application source code
+5. Copies `/build/dist/` from stage 1 into `/app/frontend/dist/`
+6. Pre-downloads the `all-MiniLM-L6-v2` embedding model into the image layer (so first request is fast)
+7. On container start: runs `scripts/ingest_all.py` (sentinel-guarded — skips if already done), then starts Uvicorn with `--reload`
+
+The multi-stage build keeps Node.js out of the final image, reducing its size.
 
 ### `docker-compose.yml`
 
@@ -551,24 +597,33 @@ Defines two services:
 
 **`rag`**
 
-- Builds the `Dockerfile` in the project root
+- Builds the multi-stage `Dockerfile`
 - Depends on `postgres` being healthy before starting
-- Mounts the `chroma_data` volume at `/app/chroma_db` so vector data persists across container restarts
-- Mounts `./data/synthetic` so generated files are accessible inside the container
-- Injects environment variables: `OPENAI_API_KEY`, `LLM_MODEL`, `CHROMA_PERSIST_DIR`, `POSTGRES_URL`
-- Health-checked via `GET /api/v1/health` — allows 90 seconds startup time for data generation and indexing
+- **Targeted volume mounts** for Python hot-reload (no full `.:/app` bind mount, which would clobber the built `frontend/dist/`):
+  - `./app:/app/app` — Python source code, reloaded by uvicorn `--reload`
+  - `./scripts:/app/scripts` — ingestion scripts
+  - `./data:/app/data` — synthetic data files
+  - `chroma_data:/app/chroma_db` — ChromaDB persistence (named volume, survives restarts)
+- Environment variables: `OPENAI_API_KEY`, `LLM_MODEL`, `CHROMA_PERSIST_DIR`, `POSTGRES_URL`, `ANONYMIZED_TELEMETRY=False`
+- `ANONYMIZED_TELEMETRY=False` suppresses ChromaDB's broken telemetry client (known bug in 0.5.x)
+- Health-checked via `GET /api/v1/health` — 90 s start period for data generation and indexing
 
-### `Dockerfile`
+### `scripts/ingest_all.py` — sentinel guard
 
-1. Starts from `python:3.11-slim`
-2. Installs all Python dependencies from `requirements.txt`
-3. Pre-downloads the `all-MiniLM-L6-v2` embedding model into the image layer (so first-run is fast)
-4. Copies all application code
-5. On container start: runs `scripts/ingest_all.py` (generates synthetic data and indexes it), then starts the Uvicorn server
+Every container startup runs `ingest_all.py`. To prevent re-indexing on restarts, it writes a sentinel file `chroma_db/.ingestion_complete` after the first successful run. On subsequent starts it detects the file and exits early. The sentinel is stored inside the `chroma_data` named volume — it is only removed when the volume is deleted (`docker compose down -v`).
+
+### Development workflow summary
+
+| What changed | Command |
+|---|---|
+| Python backend (`app/`) | Nothing — uvicorn `--reload` picks it up |
+| Frontend React (`frontend/src/`) | `docker compose up --build -d` OR `npm run dev` locally |
+| `requirements.txt` / `Dockerfile` | `docker compose up --build -d` |
+| Wipe all data and re-ingest | `docker compose down -v && docker compose up --build -d` |
 
 ### Why Docker Compose
 
-Running the two services together (Postgres + FastAPI) with a single `docker compose up` makes local setup a one-command operation. The health-check dependency chain ensures correct startup order.
+Running the two services together (Postgres + FastAPI/React) with a single `docker compose up --build -d` makes local setup a one-command operation. The health-check dependency chain ensures correct startup order.
 
 ---
 
@@ -619,6 +674,7 @@ This runs once inside the Docker container before the API server starts.
 | `langchain` | 0.2.6 | Core LangChain primitives (`Document`, prompt templates, chains) |
 | `langchain-core` | 0.2.10 | Base types used by LangChain integrations |
 | `langchain-community` | 0.2.6 | ChromaDB vector store wrapper |
+| `langchain-huggingface` | 0.0.3 | `HuggingFaceEmbeddings` — replaces deprecated `SentenceTransformerEmbeddings` from `langchain-community` |
 | `langchain-openai` | 0.1.14 | `ChatOpenAI` LLM integration |
 | `langchain-text-splitters` | 0.2.2 | `RecursiveCharacterTextSplitter` for chunking |
 | `sentence-transformers` | 3.0.1 | Local embedding model (`all-MiniLM-L6-v2`) |

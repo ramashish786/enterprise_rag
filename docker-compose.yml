@@ -34,8 +34,11 @@ services:
       - POSTGRES_URL=postgresql+psycopg2://rag:rag@postgres:5432/enterprise
       - ANONYMIZED_TELEMETRY=False
     volumes:
-      - .:/app                          # live code mount — changes reflected without rebuild
-      - chroma_data:/app/chroma_db      # named volume overrides the bind mount for this path
+      - ./app:/app/app             # Python source — hot-reloaded by uvicorn --reload
+      - ./scripts:/app/scripts     # ingestion scripts
+      - ./data:/app/data           # synthetic data files
+      - chroma_data:/app/chroma_db # ChromaDB persistence
+    
     command: >
       sh -c "python scripts/ingest_all.py || true &&
              uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"

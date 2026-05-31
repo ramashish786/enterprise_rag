@@ -4,7 +4,7 @@
 import os
 from typing import Optional
 import chromadb
-from chromadb.utils import embedding_functions
+from chromadb.config import Settings
 from langchain_community.vectorstores import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_core.documents import Document
@@ -21,15 +21,18 @@ def get_embedding_function():
 
 def get_chroma_client() -> chromadb.PersistentClient:
     os.makedirs(CHROMA_PERSIST_DIR, exist_ok=True)
-    return chromadb.PersistentClient(path=CHROMA_PERSIST_DIR)
+    return chromadb.PersistentClient(
+        path=CHROMA_PERSIST_DIR,
+        settings=Settings(anonymized_telemetry=False),
+    )
 
 
 def get_vectorstore() -> Chroma:
     embeddings = get_embedding_function()
     return Chroma(
+        client=get_chroma_client(),
         collection_name=COLLECTION_NAME,
         embedding_function=embeddings,
-        persist_directory=CHROMA_PERSIST_DIR,
     )
 
 

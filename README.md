@@ -48,23 +48,46 @@ A production-grade, secure **Retrieval-Augmented Generation (RAG)** pipeline bui
 
 ```
 enterprise_rag/
-├── Dockerfile
+├── Dockerfile                   ← Multi-stage: Node (React build) → Python (API)
 ├── docker-compose.yml
 ├── requirements.txt
 ├── .env.example
 ├── README.md
+├── ARCHITECTURE.md
 ├── app/
-│   ├── main.py                  ← FastAPI entry + static frontend
-│   ├── api/routes.py            ← /query, /ingest, /me, /postgres/*
+│   ├── main.py                  ← FastAPI entry + serves frontend/dist/
+│   ├── api/routes.py            ← /query, /ingest, /documents, /me, /postgres/*
 │   └── core/
 │       ├── rbac.py              ← Roles + permissions + auth
-│       ├── vectorstore.py       ← ChromaDB + RBAC-filtered retriever
+│       ├── vectorstore.py       ← ChromaDB + RBAC retriever + list/delete docs
 │       ├── ingestion.py         ← PDF / CSV / JSON / TXT loaders
 │       ├── postgres_source.py   ← Postgres schema, ingest, text-to-SQL
 │       └── rag_pipeline.py      ← Routing → retrieval → generation
+├── frontend/
+│   ├── package.json             ← React + Vite
+│   ├── vite.config.js           ← Build config + /api proxy for local dev
+│   ├── index.html               ← Vite HTML shell
+│   └── src/
+│       ├── main.jsx             ← React root
+│       ├── App.jsx              ← Layout, panel routing, server status
+│       ├── api.js               ← apiFetch() with auth headers
+│       ├── constants.js         ← Demo users, source descriptions, example queries
+│       ├── index.css            ← Global dark-theme styles
+│       ├── contexts/
+│       │   ├── AuthContext.jsx  ← Session state, login/logout, localStorage restore
+│       │   └── ToastContext.jsx ← Toast notification system
+│       └── components/
+│           ├── Sidebar.jsx      ← Logo, login/nav, sign-out
+│           ├── LoginCard.jsx    ← Username/password form
+│           ├── UserPill.jsx     ← Logged-in user badge
+│           ├── DemoUsers.jsx    ← Quick-login demo account pills
+│           └── panels/
+│               ├── QueryPanel.jsx   ← Chat interface + chunk viewer
+│               ├── IngestPanel.jsx  ← Drag-drop file upload (admin)
+│               ├── DocsPanel.jsx    ← Document list + delete (admin)
+│               └── StatsPanel.jsx   ← Stats cards + authorized sources
 ├── data/synthetic/generate_data.py
-├── frontend/index.html          ← Single-page web UI
-├── scripts/ingest_all.py        ← Generate + index all data
+├── scripts/ingest_all.py        ← Generate + index all data (sentinel-guarded)
 └── tests/test_rag_system.py
 ```
 
@@ -89,17 +112,19 @@ LLM_MODEL=gpt-4o-mini
 
 ### 3. Build and run
 ```bash
-docker-compose up --build
+docker compose up --build -d
 ```
 
 This starts **two containers**:
 - `rag-postgres` — PostgreSQL 16 with seeded enterprise tables
-- `enterprise-rag` — FastAPI app + ChromaDB + frontend
+- `enterprise-rag` — FastAPI app + ChromaDB + React frontend
 
-On first start (~60 sec):
+The build has two stages: first Node.js compiles the React app into `frontend/dist/`, then Python installs dependencies and pre-downloads the embedding model.
+
+On first start (~90 sec):
 1. Postgres initialises the database
 2. App generates 12 synthetic data files
-3. Indexes everything into ChromaDB
+3. Indexes everything into ChromaDB (sentinel file written — skipped on future restarts)
 4. Loads Postgres tables and seeds rows
 5. Starts the API server
 
@@ -298,6 +323,8 @@ The final LLM prompt contains **both** retrieved chunks AND live SQL results, so
 | POST | `/api/v1/ingest` | Admin | Upload & index a file |
 | GET | `/api/v1/stats` | Basic | Collection stats |
 | GET | `/api/v1/sources` | None | List data source types |
+| GET | `/api/v1/documents` | Admin | List all indexed documents with chunk counts |
+| DELETE | `/api/v1/documents/{source_name}` | Admin | Delete all chunks for a document |
 | GET | `/api/v1/roles` | Admin | All role → permission mappings |
 | GET | `/api/v1/postgres/tables` | Admin | List Postgres tables + schema |
 | POST | `/api/v1/postgres/ingest` | Admin | Index a Postgres table |
@@ -348,6 +375,29 @@ curl -u eve:eve123 \
 
 ---
 
+## Development Workflow
+
+| What changed | Command needed |
+|---|---|
+| Python backend code (`app/`) | Nothing — uvicorn `--reload` picks it up automatically |
+| Frontend React code (`frontend/src/`) | `docker compose up --build -d` OR run Vite dev server locally (see below) |
+| `requirements.txt` or `Dockerfile` | `docker compose up --build -d` |
+| Wipe all data and re-ingest from scratch | `docker compose down -v && docker compose up --build -d` |
+
+### Local frontend development (hot module replacement)
+
+Run the Vite dev server alongside the Docker backend for instant React updates:
+
+```bash
+cd frontend
+npm install
+npm run dev        # → http://localhost:5173 (proxies /api/* to localhost:8000)
+```
+
+The `vite.config.js` proxy forwards all `/api` calls to the FastAPI backend running in Docker, so you get HMR for UI changes without touching the backend.
+
+---
+
 ## Run Without Docker (Local Python)
 
 ```bash
@@ -365,10 +415,13 @@ cp .env.example .env
 echo "POSTGRES_URL=postgresql+psycopg2://rag:rag@localhost:5432/enterprise" >> .env
 # Edit OPENAI_API_KEY in .env
 
-# 4. Generate data & index
+# 4. Build the React frontend
+cd frontend && npm install && npm run build && cd ..
+
+# 5. Generate data & index
 python scripts/ingest_all.py
 
-# 5. Start server
+# 6. Start server
 uvicorn app.main:app --reload --port 8000
 ```
 
@@ -410,12 +463,16 @@ docker-compose down -v         # stop + wipe Postgres & ChromaDB volumes
 
 | Problem | Fix |
 |---------|-----|
-| `OPENAI_API_KEY` not set | Edit `.env`, restart with `docker-compose up` |
-| Postgres connection refused | Wait 30s — health check gates the app on Postgres readiness |
-| Embedding model download slow on first build | Normal — `all-MiniLM-L6-v2` (~90MB) cached after first build |
-| Frontend shows offline (red dot) | Backend still starting; refresh after ~60s |
-| Empty answers | Run `docker-compose exec rag python scripts/ingest_all.py` |
-| Rebuild from scratch | `docker-compose down -v && docker-compose up --build` |
+| `OPENAI_API_KEY` not set | Edit `.env`, restart with `docker compose up -d` |
+| Postgres connection refused | Wait 30 s — health check gates the app on Postgres readiness |
+| Embedding model download slow on first build | Normal — `all-MiniLM-L6-v2` (~90 MB) is cached in the image layer after first `--build` |
+| Frontend shows offline (red dot) | Backend still starting; refresh after ~90 s |
+| Empty answers / no chunks | Delete the sentinel and re-ingest: `docker compose down -v && docker compose up --build -d` |
+| Ingestion runs on every restart | Sentinel file (`chroma_db/.ingestion_complete`) should exist; if missing, run `docker compose up --build -d` once |
+| Frontend not updating after UI change | React is built into the image; run `docker compose up --build -d` or use `npm run dev` locally |
+| ChromaDB telemetry errors in logs | Already suppressed via `ANONYMIZED_TELEMETRY=False` env var |
+| LangChain deprecation warnings | Already fixed — using `langchain-huggingface` package |
+| Rebuild from scratch | `docker compose down -v && docker compose up --build -d` |
 
 
 ## Snap of Project
