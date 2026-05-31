@@ -6,7 +6,7 @@ from typing import Optional
 import chromadb
 from chromadb.utils import embedding_functions
 from langchain_community.vectorstores import Chroma
-from langchain_community.embeddings import SentenceTransformerEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_core.documents import Document
 
 from app.core.rbac import get_allowed_sources
@@ -16,7 +16,7 @@ CHROMA_PERSIST_DIR = os.getenv("CHROMA_PERSIST_DIR", "./chroma_db")
 
 
 def get_embedding_function():
-    return SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
+    return HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
 
 
 def get_chroma_client() -> chromadb.PersistentClient:
@@ -75,3 +75,32 @@ def collection_stats() -> dict:
         return {"total_documents": col.count(), "collection": COLLECTION_NAME}
     except Exception:
         return {"total_documents": 0, "collection": COLLECTION_NAME}
+
+
+def list_documents() -> list[dict]:
+    """Return unique documents with their source type and chunk count."""
+    client = get_chroma_client()
+    try:
+        col = client.get_collection(COLLECTION_NAME)
+        results = col.get(include=["metadatas"])
+        docs: dict[str, dict] = {}
+        for meta in results.get("metadatas") or []:
+            name = meta.get("source_name", "unknown")
+            source_type = meta.get("source_type", "unknown")
+            if name not in docs:
+                docs[name] = {"source_name": name, "source_type": source_type, "chunk_count": 0}
+            docs[name]["chunk_count"] += 1
+        return sorted(docs.values(), key=lambda x: x["source_name"])
+    except Exception:
+        return []
+
+
+def delete_document(source_name: str) -> int:
+    """Delete all chunks for a given source_name. Returns number of chunks deleted."""
+    client = get_chroma_client()
+    col = client.get_collection(COLLECTION_NAME)
+    results = col.get(where={"source_name": {"$eq": source_name}})
+    ids = results.get("ids") or []
+    if ids:
+        col.delete(ids=ids)
+    return len(ids)

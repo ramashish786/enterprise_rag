@@ -270,8 +270,11 @@
       <button class="nav-item active" data-panel="chat" onclick="switchPanel('chat', this)">
         <span class="nav-icon">💬</span> Query Assistant
       </button>
-      <button class="nav-item" data-panel="ingest" onclick="switchPanel('ingest', this)">
+      <button class="nav-item" id="nav-ingest" data-panel="ingest" onclick="switchPanel('ingest', this)" style="display:none;">
         <span class="nav-icon">📤</span> Ingest Document
+      </button>
+      <button class="nav-item" id="nav-docs" data-panel="docs" onclick="switchPanel('docs', this)" style="display:none;">
+        <span class="nav-icon">🗂️</span> Manage Documents
       </button>
       <button class="nav-item" data-panel="stats" onclick="switchPanel('stats', this)">
         <span class="nav-icon">📊</span> System Stats
@@ -374,7 +377,7 @@
           <div class="stat-card">
             <div class="stat-label">Total Chunks</div>
             <div class="stat-value" id="stat-chunks">—</div>
-            <div class="stat-sub">Indexed document chunks</div>
+            <div class="stat-sub" id="stat-chunks-sub">Indexed document chunks</div>
           </div>
           <div class="stat-card">
             <div class="stat-label">Your Role</div>
@@ -395,6 +398,16 @@
             <tbody id="sources-tbody"></tbody>
           </table>
         </div>
+      </div>
+    </div>
+
+    <!-- manage documents (admin only) -->
+    <div class="panel" id="panel-docs">
+      <div class="panel-body" style="max-width:860px;">
+        <div class="panel-heading">Manage Documents</div>
+        <div class="panel-sub">View and delete documents indexed in the knowledge base. Admin access required.</div>
+        <button class="btn" style="width:auto;padding:9px 24px;margin-bottom:24px;" onclick="loadDocuments()">Refresh</button>
+        <div id="docs-list"></div>
       </div>
     </div>
 
@@ -466,6 +479,7 @@ async function doLogin() {
     session = { username: u, password: p };
     const me = await apiFetch('/me');
     session.me = me;
+    localStorage.setItem('rag_session', JSON.stringify({ username: u, password: p }));
     onLoginSuccess(me);
   } catch (e) {
     session = null;
@@ -499,6 +513,10 @@ function onLoginSuccess(me) {
   document.getElementById('topbar-sub').textContent = me.name + ' · ' + me.role;
   document.getElementById('input-hint').textContent = 'Enter ↵ to send · Shift+Enter for new line';
 
+  const isAdmin = me.role === 'admin';
+  document.getElementById('nav-ingest').style.display = isAdmin ? 'flex' : 'none';
+  document.getElementById('nav-docs').style.display = isAdmin ? 'flex' : 'none';
+
   toast('Welcome, ' + (me.name || me.username), 'success');
   checkServerStatus();
   if (document.getElementById('panel-stats').classList.contains('active')) loadStats();
@@ -506,9 +524,12 @@ function onLoginSuccess(me) {
 
 function doLogout() {
   session = null;
+  localStorage.removeItem('rag_session');
   document.getElementById('login-section').style.display = 'block';
   document.getElementById('user-section').style.display = 'none';
   document.getElementById('chat-auth-required').style.display = 'flex';
+  document.getElementById('nav-ingest').style.display = 'none';
+  document.getElementById('nav-docs').style.display = 'none';
   document.getElementById('send-btn').disabled = true;
   document.getElementById('chat-messages').innerHTML = document.getElementById('chat-messages').innerHTML;
   // Reset chat
@@ -546,10 +567,11 @@ function switchPanel(name, btn) {
   document.getElementById('panel-' + name).classList.add('active');
   if (btn) btn.classList.add('active');
 
-  const titles = { chat: 'Query Assistant', ingest: 'Ingest Document', stats: 'System Stats' };
+  const titles = { chat: 'Query Assistant', ingest: 'Ingest Document', docs: 'Manage Documents', stats: 'System Stats' };
   document.getElementById('topbar-title').textContent = titles[name] || name;
 
   if (name === 'stats') loadStats();
+  if (name === 'docs') loadDocuments();
 }
 
 function handleKey(e) {
@@ -801,7 +823,12 @@ async function loadStats() {
     document.getElementById('stat-role').textContent = session.me?.role ?? '—';
 
     const sources = stats.your_allowed_sources || stats.all_sources || session.me?.allowed_sources || [];
-    document.getElementById('stat-sources-count').textContent = sources.length + ' data sources';
+    const isAdmin = session.me?.role === 'admin';
+    document.getElementById('stat-chunks-sub').textContent = isAdmin
+      ? 'All indexed chunks'
+      : 'All indexed chunks (system-wide)';
+    document.getElementById('stat-sources-count').textContent =
+      sources.length + (sources.length === 1 ? ' data source' : ' data sources');
 
     const tbody = document.getElementById('sources-tbody');
     tbody.innerHTML = sources.map(s => `
@@ -844,8 +871,71 @@ function toast(msg, type = '') {
   toastTimer = setTimeout(() => el.className = 'toast', 2800);
 }
 
+async function loadDocuments() {
+  if (!session) return;
+  const el = document.getElementById('docs-list');
+  el.innerHTML = '<div style="color:var(--text3);font-size:13px;font-family:var(--mono);">Loading…</div>';
+  try {
+    const data = await apiFetch('/documents');
+    if (!data.documents || data.documents.length === 0) {
+      el.innerHTML = '<div style="color:var(--text3);font-size:13px;">No documents indexed yet.</div>';
+      return;
+    }
+    const rows = data.documents.map(d => `
+      <tr>
+        <td style="font-family:var(--mono);font-size:12px;color:var(--accent);">${escHtml(d.source_name)}</td>
+        <td><span class="badge source" style="font-size:11px;">📂 ${escHtml(d.source_type)}</span></td>
+        <td style="font-family:var(--mono);color:var(--text2);text-align:right;">${d.chunk_count}</td>
+        <td style="text-align:right;">
+          <button class="btn danger"
+            style="width:auto;padding:4px 14px;font-size:12px;margin-top:0;"
+            data-source="${escHtml(d.source_name)}"
+            onclick="deleteDocument(this.dataset.source, this)">
+            Delete
+          </button>
+        </td>
+      </tr>`).join('');
+    el.innerHTML = `<table class="sources-table">
+      <thead><tr><th>Document</th><th>Source Type</th><th style="text-align:right;">Chunks</th><th style="text-align:right;">Action</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+  } catch (e) {
+    el.innerHTML = `<div class="error-msg">⚠ ${escHtml(e.message)}</div>`;
+  }
+}
+
+async function deleteDocument(sourceName, btn) {
+  if (!confirm(`Delete all chunks from "${sourceName}"?\n\nThis cannot be undone.`)) return;
+  btn.textContent = 'Deleting…';
+  btn.disabled = true;
+  try {
+    const data = await apiFetch('/documents/' + encodeURIComponent(sourceName), { method: 'DELETE' });
+    toast(`Deleted ${data.chunks_deleted} chunks from "${data.source_name}"`, 'success');
+    loadDocuments();
+  } catch (e) {
+    toast('Delete failed: ' + e.message, 'error');
+    btn.textContent = 'Delete';
+    btn.disabled = false;
+  }
+}
+
 buildDemoUsers();
 checkServerStatus();
+
+(async () => {
+  const saved = localStorage.getItem('rag_session');
+  if (!saved) return;
+  try {
+    const { username, password } = JSON.parse(saved);
+    session = { username, password };
+    const me = await apiFetch('/me');
+    session.me = me;
+    onLoginSuccess(me);
+  } catch {
+    localStorage.removeItem('rag_session');
+    session = null;
+  }
+})();
 setInterval(checkServerStatus, 30000);
 
 document.getElementById('inp-pass').addEventListener('keydown', e => {

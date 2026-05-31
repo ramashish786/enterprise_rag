@@ -32,9 +32,13 @@ services:
       - LLM_MODEL=${LLM_MODEL:-gpt-4o-mini}
       - CHROMA_PERSIST_DIR=/app/chroma_db
       - POSTGRES_URL=postgresql+psycopg2://rag:rag@postgres:5432/enterprise
+      - ANONYMIZED_TELEMETRY=False
     volumes:
-      - chroma_data:/app/chroma_db
-      - ./data/synthetic:/app/data/synthetic
+      - .:/app                          # live code mount — changes reflected without rebuild
+      - chroma_data:/app/chroma_db      # named volume overrides the bind mount for this path
+    command: >
+      sh -c "python scripts/ingest_all.py || true &&
+             uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]

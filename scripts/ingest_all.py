@@ -18,6 +18,12 @@ from app.core.ingestion import ingest_file
 
 DATA_DIR = Path("data/synthetic")
 
+# Sentinel file lives inside the chroma_data named volume.
+# Its presence means ingestion already ran successfully.
+# It is wiped only when the volume is deleted (docker compose down -v).
+CHROMA_DIR = Path(os.getenv("CHROMA_PERSIST_DIR", "./chroma_db"))
+SENTINEL = CHROMA_DIR / ".ingestion_complete"
+
 FILE_SOURCE_MAP = {
     "q1_2024_finance_report.txt": "finance_reports",
     "department_budgets_q1_2024.csv": "finance_reports",
@@ -39,7 +45,24 @@ def main():
     print("  Enterprise RAG — Data Ingestion Pipeline")
     print("=" * 60)
 
-    print("\n[1/2] Generating synthetic datasets...")
+    # Always ensure Postgres schema and seed data exist (ON CONFLICT DO NOTHING makes this safe)
+    print("\n[0/3] Ensuring PostgreSQL schema...")
+    try:
+        from app.core.postgres_source import init_demo_schema
+        init_demo_schema()
+        print("  ✓ Postgres schema ready")
+    except Exception as e:
+        print(f"  ⚠ Postgres unavailable, skipping: {e}")
+
+    # Sentinel check — skip if ingestion already completed on a previous run.
+    # The sentinel lives inside the chroma_data volume so it survives restarts
+    # and is only removed when the volume itself is deleted.
+    if SENTINEL.exists():
+        print("\n✓ Ingestion already complete (sentinel found) — skipping.")
+        print("  To re-ingest from scratch: docker compose down -v && docker compose up")
+        return
+
+    print("\n[1/3] Generating synthetic datasets...")
     generate_finance_report()
     generate_finance_csv()
     generate_hr_records()
@@ -53,11 +76,10 @@ def main():
     generate_access_policies()
     generate_user_role_mappings()
 
-    # Initialise & ingest Postgres tables
-    print("\n[1.5/2] Setting up PostgreSQL data source...")
+    # Ingest Postgres tables into ChromaDB
+    print("\n[2/3] Indexing PostgreSQL tables into ChromaDB...")
     try:
-        from app.core.postgres_source import init_demo_schema, ingest_table, list_tables
-        init_demo_schema()
+        from app.core.postgres_source import ingest_table
         pg_tables = {
             "employees": "hr_records",
             "sales_deals": "sales_data",
@@ -72,7 +94,7 @@ def main():
     except Exception as e:
         print(f"  ⚠ Postgres unavailable, skipping: {e}")
 
-    print("\n[2/2] Indexing into ChromaDB...")
+    print("\n[3/3] Indexing files into ChromaDB...")
     total_chunks = 0
     errors = []
     for filename, source_type in FILE_SOURCE_MAP.items():
@@ -91,8 +113,11 @@ def main():
             errors.append(f"{filename}: {e}")
             print(f"  ✗ {filename}: {e}")
 
+    CHROMA_DIR.mkdir(parents=True, exist_ok=True)
+    SENTINEL.touch()
+
     print(f"\n{'=' * 60}")
-    print(f"  Done! {total_chunks} total chunks indexed.")
+    print(f"  Done! {total_chunks} chunks indexed.")
     if errors:
         print(f"  {len(errors)} error(s):")
         for e in errors:

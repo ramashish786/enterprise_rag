@@ -123,6 +123,126 @@ Use any demo user from the sidebar (click to auto-fill):
 
 ---
 
+## Using the App
+
+### Signing in
+
+Open **http://localhost:8000** in your browser.
+
+**Option A — Quick login (demo accounts)**
+
+Click any user pill in the sidebar under **Demo Accounts**. It auto-fills the credentials and logs you in immediately.
+
+**Option B — Manual login**
+
+1. Enter a username and password in the **Sign In** fields.
+2. Click **Connect**.
+
+Once signed in, the sidebar shows your name, role, and the data sources you are authorised to access. Your session is saved in the browser so **refreshing the page does not log you out**. To end the session click **Sign out** at the bottom of the sidebar.
+
+---
+
+### Querying the knowledge base
+
+1. After login you land on the **Query Assistant** panel (chat icon).
+2. Type a question in the text box and press **Enter** to send (use **Shift + Enter** for a new line).
+3. The answer appears as a chat bubble with:
+
+| Element | What it means |
+|---|---|
+| Answer text | LLM response grounded in your authorised documents |
+| `◆ High / Medium / Low` badge | Confidence based on how well the retrieved context matched the question |
+| `📄 source_name` badges | Documents cited in the answer |
+| `🔀 N chunks` badge | Number of document chunks retrieved |
+| Reasoning block *(italic, blue border)* | Brief explanation of how the answer was derived |
+| ▶ Show N retrieved chunks | Click to expand and inspect the exact text snippets used, with relevance % scores |
+
+> **RBAC in action:** If you ask about data outside your role (e.g. a `viewer` asking about salaries), the system returns *"Insufficient data in authorized sources"* — it never leaks restricted content.
+
+---
+
+### Uploading a document *(admin only)*
+
+> Only the **frank / admin** account can upload documents. The **Ingest Document** option is hidden from all other roles.
+
+1. Sign in as `frank` (`frank123`).
+2. Click **Ingest Document** in the sidebar (upload icon).
+3. Choose a **Data Source Type** from the dropdown. This controls which roles can query the document after upload:
+
+| Source type | Roles that can read it |
+|---|---|
+| `finance_reports` | admin, finance |
+| `hr_records` | admin, hr, legal |
+| `engineering_docs` | admin, engineering |
+| `legal_contracts` | admin, legal |
+| `sales_data` | admin, sales |
+| `compliance` | admin, finance, hr, legal |
+| `operational` | admin, finance, engineering, sales |
+| `public` | everyone |
+
+4. **Drag and drop** a file onto the upload zone, or click it to open a file picker.
+   Supported formats: `.pdf` `.csv` `.json` `.jsonl` `.txt` `.md`
+5. The selected file name and size appear below the zone. Click **✕** to deselect.
+6. Click **Upload & Index**.
+7. A green confirmation shows how many chunks were indexed:
+   ```
+   ✓ Indexed 42 chunks from quarterly_report.pdf into finance_reports
+   ```
+   The document is immediately queryable by authorised users.
+
+---
+
+### Viewing the list of indexed documents *(admin only)*
+
+> The **Manage Documents** panel is visible only to the admin role.
+
+1. Sign in as `frank`.
+2. Click **Manage Documents** in the sidebar (folder icon).
+3. A table loads with one row per indexed document:
+
+| Column | Description |
+|---|---|
+| Document | Source name (filename stem, e.g. `q1_2024_finance_report`) |
+| Source Type | Data source category the document was tagged with |
+| Chunks | Number of text chunks stored in ChromaDB for this document |
+| Action | Delete button (see below) |
+
+4. Click **Refresh** at any time to reload the list (e.g. after uploading a new file).
+
+> Documents indexed from PostgreSQL tables appear as `postgres.employees`, `postgres.sales_deals`, etc. They can be deleted the same way as file-based documents.
+
+---
+
+### Deleting a document *(admin only)*
+
+1. Sign in as `frank`.
+2. Open **Manage Documents** in the sidebar.
+3. Find the document you want to remove and click its red **Delete** button.
+4. A confirmation dialog appears — click **OK** to confirm or **Cancel** to abort.
+5. On success a toast notification shows:
+   ```
+   Deleted 42 chunks from "quarterly_report"
+   ```
+   The document disappears from the table and is no longer retrievable in any query.
+
+> **Note:** Deletion removes all chunks from ChromaDB permanently. It does **not** delete the original file from disk. To restore a deleted document, re-upload it via **Ingest Document**.
+
+---
+
+### Viewing system stats
+
+Click **System Stats** in the sidebar (chart icon) to see:
+
+| Card | Shows |
+|---|---|
+| Total Chunks | All chunks indexed in ChromaDB (system-wide) |
+| Your Role | Your current role |
+| Collection | ChromaDB collection name (`enterprise_rag`) |
+
+Below the cards, the **Your Authorized Sources** table lists every data source your role can access, with a short description of each.
+
+---
+
 ## How the LLM Uses Each Data Source
 
 ### A. Vectorised documents (ChromaDB)

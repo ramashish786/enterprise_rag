@@ -10,7 +10,7 @@ import secrets
 from app.core.rbac import authenticate_user, UserContext, USERS, ROLE_PERMISSIONS, DataSource
 from app.core.rag_pipeline import run_rag_query
 from app.core.ingestion import ingest_file
-from app.core.vectorstore import collection_stats
+from app.core.vectorstore import collection_stats, list_documents, delete_document
 
 router = APIRouter()
 security = HTTPBasic()
@@ -146,6 +146,28 @@ def postgres_ingest(req: PgIngestRequest, user: UserContext = Depends(get_curren
         return ingest_table(req.table_name, req.source_type, req.limit or 1000)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/documents")
+def get_documents(user: UserContext = Depends(get_current_user)):
+    """Admin-only: list all indexed documents with chunk counts."""
+    if user.role.value != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+    return {"documents": list_documents()}
+
+
+@router.delete("/documents/{source_name}")
+def remove_document(source_name: str, user: UserContext = Depends(get_current_user)):
+    """Admin-only: delete all chunks for a given document."""
+    if user.role.value != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+    try:
+        chunks_deleted = delete_document(source_name)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Delete failed: {str(e)}")
+    if chunks_deleted == 0:
+        raise HTTPException(status_code=404, detail=f"No document found with source_name '{source_name}'")
+    return {"source_name": source_name, "chunks_deleted": chunks_deleted}
 
 
 @router.get("/roles")
